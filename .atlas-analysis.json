@@ -1,0 +1,78 @@
+{
+  "projectType": "frontend",
+  "projectName": "Introducción a la Programación Web",
+  "projectDescription": "Proyecto educativo para aprender fundamentos de JavaScript, manipulación del DOM, asincronismo y almacenamiento web.",
+  "theme": "almond",
+  "primaryColor": "#4a90e2",
+  "lightColor": null,
+  "darkColor": null,
+  "navigation": {
+    "groups": [
+      {
+        "group": "Introducción",
+        "pages": [
+          "introduction",
+          "getting-started"
+        ]
+      },
+      {
+        "group": "Fundamentos",
+        "pages": [
+          "fundamentals/dom-manipulation",
+          "fundamentals/selectors",
+          "fundamentals/event-listeners"
+        ]
+      },
+      {
+        "group": "JavaScript Asíncrono",
+        "pages": [
+          "async/introduction",
+          "async/callbacks",
+          "async/promises",
+          "async/async-await"
+        ]
+      },
+      {
+        "group": "HTTP y Almacenamiento",
+        "pages": [
+          "http/fetch-api",
+          "http/handling-responses",
+          "storage/local-storage",
+          "storage/session-storage"
+        ]
+      },
+      {
+        "group": "Ejemplos Prácticos",
+        "pages": [
+          "examples/dom-examples",
+          "examples/async-examples",
+          "examples/fetch-examples",
+          "examples/storage-examples"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Manipulación del DOM con JavaScript",
+    "Programación asíncrona con Promises y Async/Await",
+    "Peticiones HTTP con Fetch API",
+    "Almacenamiento local y de sesión en el navegador",
+    "Event listeners y manejo de eventos",
+    "Ejemplos interactivos y prácticos"
+  ],
+  "publicApiSurface": [
+    "document.getElementById()",
+    "document.getElementsByClassName()",
+    "document.querySelector()",
+    "document.querySelectorAll()",
+    "element.addEventListener()",
+    "setTimeout()",
+    "Promise",
+    "async/await",
+    "fetch()",
+    "localStorage.setItem()",
+    "localStorage.getItem()",
+    "sessionStorage.setItem()",
+    "sessionStorage.getItem()"
+  ]
+}
