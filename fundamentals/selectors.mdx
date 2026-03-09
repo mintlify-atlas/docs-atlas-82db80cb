@@ -1,0 +1,272 @@
+---
+title: Selectores del DOM
+description: Domina los métodos para seleccionar elementos HTML con JavaScript
+---
+
+# Selectores del DOM
+
+Los selectores son la base de la manipulación del DOM. Antes de poder modificar un elemento, necesitas seleccionarlo. JavaScript ofrece varios métodos para encontrar elementos en el documento.
+
+## getElementById
+
+Selecciona un elemento por su atributo `id`. Retorna un único elemento o `null` si no existe.
+
+```javascript
+function demoGetById() {
+    var elemento = document.getElementById('texto-ejemplo');
+    elemento.textContent = 'Texto cambiado con getElementById';
+    elemento.style.color = 'blue';
+    console.log('getElementById:', elemento);
+}
+```
+
+**Características:**
+- Es el método más rápido
+- Retorna un único elemento (los IDs deben ser únicos)
+- Retorna `null` si no encuentra el elemento
+- No necesitas el prefijo `#` como en CSS
+
+<Note>
+Los IDs deben ser únicos en toda la página. Si hay IDs duplicados, este método solo retornará el primero que encuentre.
+</Note>
+
+## getElementsByClassName
+
+Selecciona todos los elementos que tienen una clase CSS específica. Retorna una **HTMLCollection** (similar a un array).
+
+```javascript
+function demoGetByClass() {
+    var elementos = document.getElementsByClassName('destacado');
+    console.log('getElementsByClassName encontró:', elementos.length, 'elementos');
+
+    for (var i = 0; i < elementos.length; i++) {
+        elementos[i].style.backgroundColor = 'orange';
+        elementos[i].style.color = 'white';
+    }
+}
+```
+
+**Características:**
+- Retorna una colección **viva** (se actualiza automáticamente si el DOM cambia)
+- Puedes iterar sobre ella con un bucle `for`
+- No necesitas el prefijo `.` como en CSS
+- Si no encuentra elementos, retorna una colección vacía (length = 0)
+
+<Warning>
+Las HTMLCollection son "vivas", lo que significa que se actualizan automáticamente. Ten cuidado al modificar elementos mientras iteras, ya que la colección puede cambiar durante el bucle.
+</Warning>
+
+## getElementsByTagName
+
+Selecciona todos los elementos de un tipo de etiqueta HTML específico.
+
+```javascript
+var elementByTagName = document.getElementsByTagName('ul');
+console.log('getElementsByTagName:', elementByTagName);
+```
+
+**Ejemplo práctico:**
+
+```javascript
+// Seleccionar todos los párrafos
+const parrafos = document.getElementsByTagName('p');
+
+// Cambiar el color de todos los párrafos
+for (let i = 0; i < parrafos.length; i++) {
+    parrafos[i].style.color = 'navy';
+}
+```
+
+**Características:**
+- Retorna una HTMLCollection viva
+- Útil para seleccionar todos los elementos de un tipo
+- Puedes usar `'*'` para seleccionar todos los elementos
+
+## querySelector
+
+Selecciona el **primer elemento** que coincide con un selector CSS. Retorna un único elemento o `null`.
+
+```javascript
+var primerItem = document.querySelector('.item');
+console.log('querySelector: ', primerItem);
+```
+
+```javascript
+function demoQuerySelector() {
+    var primerItem = document.querySelector('.item');
+    primerItem.style.backgroundColor = 'lightgreen';
+    primerItem.textContent = 'Seleccionado con querySelector';
+    console.log('querySelector seleccionó:', primerItem);
+}
+```
+
+### Ejemplos de Selectores CSS
+
+<Tabs>
+  <Tab title="Clases">
+    ```javascript
+    // Seleccionar por clase
+    const elemento = document.querySelector('.mi-clase');
+    
+    // Seleccionar clases múltiples
+    const elemento2 = document.querySelector('.clase1.clase2');
+    ```
+  </Tab>
+
+  <Tab title="IDs">
+    ```javascript
+    // Seleccionar por ID
+    const elemento = document.querySelector('#mi-id');
+    ```
+  </Tab>
+
+  <Tab title="Atributos">
+    ```javascript
+    // Seleccionar por atributo
+    const input = document.querySelector('[type="text"]');
+    
+    // Seleccionar por atributo data-*
+    const elemento = document.querySelector('[data-id="123"]');
+    ```
+  </Tab>
+
+  <Tab title="Combinadores">
+    ```javascript
+    // Hijo directo
+    const elemento = document.querySelector('.padre > .hijo');
+    
+    // Descendiente
+    const elemento2 = document.querySelector('.contenedor .item');
+    
+    // Hermano adyacente
+    const elemento3 = document.querySelector('h2 + p');
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+`querySelector` acepta cualquier selector CSS válido, lo que lo hace muy flexible y poderoso.
+</Tip>
+
+## querySelectorAll
+
+Selecciona **todos los elementos** que coinciden con un selector CSS. Retorna una **NodeList**.
+
+```javascript
+var todosLosItems = document.querySelectorAll('.item');
+console.log('querySelectorAll: ', todosLosItems);
+```
+
+**Ejemplo práctico:**
+
+```javascript
+// Seleccionar todos los elementos con clase 'item'
+const items = document.querySelectorAll('.item');
+
+// Iterar usando forEach (NodeList soporta forEach)
+items.forEach(function(item, index) {
+    item.textContent = `Item ${index + 1}`;
+    item.style.padding = '10px';
+});
+```
+
+**Diferencias con getElementsByClassName:**
+
+<AccordionGroup>
+  <Accordion title="NodeList vs HTMLCollection">
+    - `querySelectorAll` retorna una **NodeList estática** (no se actualiza automáticamente)
+    - `getElementsByClassName` retorna una **HTMLCollection viva** (se actualiza automáticamente)
+    - NodeList soporta el método `forEach()`, HTMLCollection no
+  </Accordion>
+
+  <Accordion title="Flexibilidad de Selectores">
+    - `querySelectorAll` acepta cualquier selector CSS complejo
+    - `getElementsByClassName` solo acepta nombres de clases simples
+  </Accordion>
+
+  <Accordion title="Performance">
+    - `getElementsByClassName` es ligeramente más rápido
+    - Para la mayoría de casos, la diferencia es insignificante
+    - Elige el que te resulte más conveniente para tu caso de uso
+  </Accordion>
+</AccordionGroup>
+
+## Comparación de Métodos
+
+| Método | Retorna | Vivo/Estático | Selector |
+|--------|---------|----------------|----------|
+| `getElementById` | Elemento único | N/A | ID solamente |
+| `getElementsByClassName` | HTMLCollection | Vivo | Clase solamente |
+| `getElementsByTagName` | HTMLCollection | Vivo | Etiqueta solamente |
+| `querySelector` | Elemento único | N/A | Cualquier CSS |
+| `querySelectorAll` | NodeList | Estático | Cualquier CSS |
+
+## ¿Cuál Usar?
+
+<Steps>
+  <Step title="Para un elemento único con ID">
+    Usa `getElementById` - es el más rápido y directo.
+    
+    ```javascript
+    const header = document.getElementById('header');
+    ```
+  </Step>
+
+  <Step title="Para múltiples elementos con selectores complejos">
+    Usa `querySelectorAll` - acepta cualquier selector CSS.
+    
+    ```javascript
+    const items = document.querySelectorAll('.lista > .item:not(.inactivo)');
+    ```
+  </Step>
+
+  <Step title="Para múltiples elementos simples por clase">
+    Usa `getElementsByClassName` o `querySelectorAll` - ambos funcionan bien.
+    
+    ```javascript
+    // Opción 1
+    const botones = document.getElementsByClassName('boton');
+    
+    // Opción 2
+    const botones2 = document.querySelectorAll('.boton');
+    ```
+  </Step>
+
+  <Step title="Cuando necesitas forEach">
+    Usa `querySelectorAll` - soporta forEach nativamente.
+    
+    ```javascript
+    document.querySelectorAll('.item').forEach(item => {
+        item.addEventListener('click', handleClick);
+    });
+    ```
+  </Step>
+</Steps>
+
+## Selección en Contexto
+
+Todos estos métodos también funcionan en elementos específicos, no solo en `document`:
+
+```javascript
+// Seleccionar un contenedor
+const contenedor = document.getElementById('contenedor');
+
+// Buscar solo dentro de ese contenedor
+const items = contenedor.querySelectorAll('.item');
+const destacados = contenedor.getElementsByClassName('destacado');
+```
+
+<Tip>
+Buscar dentro de un elemento específico es más rápido que buscar en todo el documento, especialmente en páginas grandes.
+</Tip>
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="Manipulación del DOM" icon="wand-magic-sparkles" href="/fundamentals/dom-manipulation">
+    Aprende a modificar elementos seleccionados
+  </Card>
+  <Card title="Event Listeners" icon="bolt" href="/fundamentals/event-listeners">
+    Añade interactividad con eventos
+  </Card>
+</CardGroup>

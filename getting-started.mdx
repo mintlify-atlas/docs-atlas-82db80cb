@@ -1,0 +1,158 @@
+---
+title: Primeros Pasos
+description: Configura tu entorno y escribe tu primer código JavaScript
+---
+
+# Primeros Pasos
+
+Esta guía te ayudará a configurar tu entorno de desarrollo y escribir tu primer código JavaScript para manipular el DOM.
+
+## Configuración del Entorno
+
+<Steps>
+  <Step title="Crea la estructura de archivos">
+    Crea una carpeta para tu proyecto y los siguientes archivos:
+    
+    ```bash
+    mkdir mi-proyecto-web
+    cd mi-proyecto-web
+    touch index.html
+    touch script.js
+    touch style.css
+    ```
+  </Step>
+
+  <Step title="Configura el archivo HTML">
+    Crea un archivo HTML básico con la estructura necesaria:
+
+    ```html index.html
+    <!DOCTYPE html>
+    <html lang="es">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Mi Primer Proyecto Web</title>
+        <link rel="stylesheet" href="style.css" />
+        <script src="script.js" defer></script>
+      </head>
+      <body>
+        <header>
+          <h1>Mi Proyecto Web</h1>
+        </header>
+        <main>
+          <button id="mi-boton">Haz clic aquí</button>
+          <p id="resultado"></p>
+        </main>
+      </body>
+    </html>
+    ```
+
+    <Note>
+    El atributo `defer` en la etiqueta `<script>` asegura que el JavaScript se ejecute después de que el HTML se haya cargado completamente.
+    </Note>
+  </Step>
+
+  <Step title="Escribe tu primer código JavaScript">
+    En `script.js`, agrega el siguiente código:
+
+    ```javascript script.js
+    console.log('Script cargado correctamente');
+
+    // Seleccionar elementos del DOM
+    const boton = document.getElementById('mi-boton');
+    const resultado = document.getElementById('resultado');
+
+    // Agregar un event listener
+    boton.addEventListener('click', function() {
+      resultado.textContent = '¡Hiciste clic en el botón!';
+      console.log('Botón clickeado');
+    });
+    ```
+  </Step>
+
+  <Step title="Abre el archivo en tu navegador">
+    Abre `index.html` en tu navegador web favorito. Puedes:
+    - Hacer doble clic en el archivo
+    - Arrastrar el archivo a la ventana del navegador
+    - Usar la opción "Abrir archivo" en el menú del navegador
+  </Step>
+
+  <Step title="Abre la Consola de Desarrollador">
+    Para ver los mensajes de `console.log()` y depurar tu código:
+
+    <Tabs>
+      <Tab title="Chrome / Edge">
+        Presiona `F12` o `Ctrl+Shift+I` (Windows/Linux) o `Cmd+Option+I` (Mac)
+      </Tab>
+      <Tab title="Firefox">
+        Presiona `F12` o `Ctrl+Shift+K` (Windows/Linux) o `Cmd+Option+K` (Mac)
+      </Tab>
+      <Tab title="Safari">
+        Presiona `Cmd+Option+C` (primero habilita el menú de desarrollo en Preferencias)
+      </Tab>
+    </Tabs>
+  </Step>
+</Steps>
+
+## Ejecutar el Proyecto de Ejemplo
+
+Este repositorio incluye ejemplos completos que puedes ejecutar directamente.
+
+### Estructura del Proyecto
+
+El proyecto incluye varios archivos de ejemplo:
+
+- `index.html` - Página principal con estructura HTML
+- `script.js` - Ejemplos de manipulación del DOM
+- `clase-10.js` - Ejemplos de programación asíncrona
+- `clase-11.js` - Ejemplos de Fetch API y almacenamiento
+- `style.css` - Estilos para la interfaz
+- `normalize.css` - Normalización de estilos entre navegadores
+
+### Cambiar entre Ejemplos
+
+En el archivo `index.html`, puedes cambiar qué script se carga modificando las líneas:
+
+```html
+<!-- <script src="script.js" defer></script> -->
+<!-- <script src="clase-10.js" defer></script> -->
+<script src="clase-11.js" defer></script>
+```
+
+Simplemente comenta/descomenta la línea del script que quieras ejecutar.
+
+<Warning>
+Solo debe haber un `<script>` activo a la vez. Asegúrate de comentar los demás con `<!-- -->`.
+</Warning>
+
+## Verificar que Todo Funciona
+
+Si todo está configurado correctamente, deberías:
+
+1. Ver el mensaje "Script cargado correctamente" en la consola del navegador
+2. Ver un botón en la página
+3. Al hacer clic en el botón, ver el mensaje "¡Hiciste clic en el botón!" en la página
+4. Ver "Botón clickeado" en la consola
+
+<Tip>
+Si algo no funciona, revisa la consola del navegador. Los errores de JavaScript aparecerán allí con información sobre qué salió mal y en qué línea.
+</Tip>
+
+## Próximos Pasos
+
+Ahora que tienes tu entorno configurado, estás listo para:
+
+<CardGroup cols={2}>
+  <Card title="Manipulación del DOM" icon="code" href="/fundamentals/dom-manipulation">
+    Aprende a seleccionar y modificar elementos HTML
+  </Card>
+  <Card title="Selectores" icon="pointer" href="/fundamentals/selectors">
+    Domina los diferentes métodos de selección
+  </Card>
+  <Card title="Event Listeners" icon="bolt" href="/fundamentals/event-listeners">
+    Maneja interacciones del usuario
+  </Card>
+  <Card title="JavaScript Asíncrono" icon="clock" href="/async/introduction">
+    Entiende la programación asíncrona
+  </Card>
+</CardGroup>

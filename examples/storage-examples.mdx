@@ -1,0 +1,605 @@
+---
+title: Ejemplos de Storage
+description: Ejemplos completos de uso de localStorage y sessionStorage
+---
+
+# Ejemplos Completos de Web Storage
+
+Estos ejemplos muestran cómo usar localStorage y sessionStorage en aplicaciones reales.
+
+## Ejemplos del Proyecto
+
+### localStorage - Datos Persistentes
+
+```javascript
+const LS_USER_KEY = "demoUser";
+const LS_EMAIL_KEY = "demoEmail";
+
+const btnLsShow = document.getElementById("ls-show");
+const btnLsCreate = document.getElementById("ls-create");
+const btnLsUpdate = document.getElementById("ls-update");
+const btnLsDelete = document.getElementById("ls-delete");
+
+// Mostrar datos
+btnLsShow.addEventListener("click", function () {
+  var user = localStorage.getItem(LS_USER_KEY);
+  var email = localStorage.getItem(LS_EMAIL_KEY);
+  console.log("[LS] user: " + user + ", email: " + email);
+});
+
+// Crear datos
+btnLsCreate.addEventListener("click", function () {
+  localStorage.setItem(LS_USER_KEY, "rick");
+  localStorage.setItem(LS_EMAIL_KEY, "rick@example.com");
+  console.log("[LS] creado: { user: rick, email: rick@example.com }");
+});
+
+// Actualizar datos
+btnLsUpdate.addEventListener("click", function () {
+  localStorage.setItem(LS_USER_KEY, "morty");
+  localStorage.setItem(LS_EMAIL_KEY, "morty@example.com");
+  console.log("[LS] modificado: { user: morty, email: morty@example.com }");
+});
+
+// Eliminar datos
+btnLsDelete.addEventListener("click", function () {
+  localStorage.removeItem(LS_USER_KEY);
+  localStorage.removeItem(LS_EMAIL_KEY);
+  console.log("[LS] eliminado: demoUser/demoEmail borrados");
+});
+```
+
+### sessionStorage - Datos Temporales
+
+```javascript
+const SS_USER_KEY = "demoUserSS";
+const SS_EMAIL_KEY = "demoEmailSS";
+
+const btnSsShow = document.getElementById("ss-show");
+const btnSsCreate = document.getElementById("ss-create");
+const btnSsUpdate = document.getElementById("ss-update");
+const btnSsDelete = document.getElementById("ss-delete");
+
+// Mostrar datos
+btnSsShow.addEventListener("click", function () {
+  var user = sessionStorage.getItem(SS_USER_KEY);
+  var email = sessionStorage.getItem(SS_EMAIL_KEY);
+  console.log("[SS] user: " + user + ", email: " + email);
+});
+
+// Crear datos
+btnSsCreate.addEventListener("click", function () {
+  sessionStorage.setItem(SS_USER_KEY, "summer");
+  sessionStorage.setItem(SS_EMAIL_KEY, "summer@example.com");
+  console.log("[SS] creado: { user: summer, email: summer@example.com }");
+});
+
+// Actualizar datos
+btnSsUpdate.addEventListener("click", function () {
+  var user = sessionStorage.getItem(SS_USER_KEY);
+  var email = sessionStorage.getItem(SS_EMAIL_KEY);
+  if (user === null && email === null) {
+    console.log("[SS] Nada que actualizar. Primero crea los datos.");
+    return;
+  }
+  sessionStorage.setItem(SS_USER_KEY, "beth");
+  sessionStorage.setItem(SS_EMAIL_KEY, "beth@example.com");
+  console.log("[SS] modificado: { user: beth, email: beth@example.com }");
+});
+
+// Eliminar datos
+btnSsDelete.addEventListener("click", function () {
+  sessionStorage.removeItem(SS_USER_KEY);
+  sessionStorage.removeItem(SS_EMAIL_KEY);
+  console.log("[SS] eliminado: demoUserSS/demoEmailSS borrados");
+});
+```
+
+## Ejemplo: Sistema de Preferencias de Usuario
+
+```javascript
+// Preferencias por defecto
+const PREFERENCIAS_DEFAULT = {
+  tema: 'claro',
+  idioma: 'es',
+  notificaciones: true,
+  tamanoFuente: 'medio'
+};
+
+// Cargar preferencias (con fallback a defaults)
+function cargarPreferencias() {
+  const guardadas = localStorage.getItem('preferencias');
+  
+  if (guardadas) {
+    try {
+      return { ...PREFERENCIAS_DEFAULT, ...JSON.parse(guardadas) };
+    } catch (error) {
+      console.error('Error al parsear preferencias:', error);
+      return PREFERENCIAS_DEFAULT;
+    }
+  }
+  
+  return PREFERENCIAS_DEFAULT;
+}
+
+// Guardar preferencias
+function guardarPreferencias(preferencias) {
+  localStorage.setItem('preferencias', JSON.stringify(preferencias));
+  console.log('Preferencias guardadas');
+}
+
+// Aplicar tema
+function aplicarTema(tema) {
+  document.body.className = `tema-${tema}`;
+}
+
+// Aplicar tamaño de fuente
+function aplicarTamanoFuente(tamano) {
+  const tamanos = {
+    pequeño: '14px',
+    medio: '16px',
+    grande: '18px'
+  };
+  document.documentElement.style.fontSize = tamanos[tamano];
+}
+
+// Inicializar preferencias al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+  const prefs = cargarPreferencias();
+  
+  aplicarTema(prefs.tema);
+  aplicarTamanoFuente(prefs.tamanoFuente);
+  
+  // Actualizar controles de UI
+  document.getElementById('tema').value = prefs.tema;
+  document.getElementById('idioma').value = prefs.idioma;
+  document.getElementById('notificaciones').checked = prefs.notificaciones;
+  document.getElementById('tamanoFuente').value = prefs.tamanoFuente;
+});
+
+// Manejar cambios en preferencias
+document.getElementById('form-preferencias').addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const preferencias = {
+    tema: document.getElementById('tema').value,
+    idioma: document.getElementById('idioma').value,
+    notificaciones: document.getElementById('notificaciones').checked,
+    tamanoFuente: document.getElementById('tamanoFuente').value
+  };
+  
+  guardarPreferencias(preferencias);
+  aplicarTema(preferencias.tema);
+  aplicarTamanoFuente(preferencias.tamanoFuente);
+  
+  alert('Preferencias guardadas');
+});
+```
+
+## Ejemplo: Formulario Multi-Paso con Autosave
+
+```javascript
+const STORAGE_KEY = 'formulario_registro';
+let pasoActual = 1;
+
+// Guardar progreso automáticamente
+function guardarProgreso() {
+  const datos = {
+    paso: pasoActual,
+    nombre: document.getElementById('nombre')?.value || '',
+    email: document.getElementById('email')?.value || '',
+    telefono: document.getElementById('telefono')?.value || '',
+    direccion: document.getElementById('direccion')?.value || ''
+  };
+  
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
+  console.log('Progreso guardado');
+}
+
+// Cargar progreso guardado
+function cargarProgreso() {
+  const guardado = sessionStorage.getItem(STORAGE_KEY);
+  
+  if (!guardado) {
+    return null;
+  }
+  
+  try {
+    return JSON.parse(guardado);
+  } catch (error) {
+    console.error('Error al cargar progreso:', error);
+    return null;
+  }
+}
+
+// Restaurar formulario
+function restaurarFormulario() {
+  const datos = cargarProgreso();
+  
+  if (!datos) {
+    console.log('No hay progreso guardado');
+    return;
+  }
+  
+  // Preguntar al usuario
+  const continuar = confirm('¿Quieres continuar donde lo dejaste?');
+  
+  if (continuar) {
+    pasoActual = datos.paso;
+    mostrarPaso(pasoActual);
+    
+    // Rellenar campos
+    if (datos.nombre) document.getElementById('nombre').value = datos.nombre;
+    if (datos.email) document.getElementById('email').value = datos.email;
+    if (datos.telefono) document.getElementById('telefono').value = datos.telefono;
+    if (datos.direccion) document.getElementById('direccion').value = datos.direccion;
+    
+    console.log('Progreso restaurado');
+  } else {
+    sessionStorage.removeItem(STORAGE_KEY);
+  }
+}
+
+// Guardar en cada cambio
+document.querySelectorAll('input, textarea').forEach(input => {
+  input.addEventListener('input', guardarProgreso);
+});
+
+// Limpiar al enviar
+document.getElementById('formulario').addEventListener('submit', (e) => {
+  e.preventDefault();
+  // ... enviar datos
+  sessionStorage.removeItem(STORAGE_KEY);
+  alert('Formulario enviado');
+});
+
+// Restaurar al cargar
+window.addEventListener('DOMContentLoaded', restaurarFormulario);
+```
+
+## Ejemplo: Lista de Tareas Persistente
+
+```javascript
+const STORAGE_KEY = 'lista_tareas';
+let tareas = [];
+
+// Cargar tareas
+function cargarTareas() {
+  const guardadas = localStorage.getItem(STORAGE_KEY);
+  return guardadas ? JSON.parse(guardadas) : [];
+}
+
+// Guardar tareas
+function guardarTareas() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tareas));
+}
+
+// Agregar tarea
+function agregarTarea(texto) {
+  const tarea = {
+    id: Date.now(),
+    texto: texto,
+    completada: false,
+    fechaCreacion: new Date().toISOString()
+  };
+  
+  tareas.push(tarea);
+  guardarTareas();
+  renderizarTareas();
+}
+
+// Toggle completada
+function toggleTarea(id) {
+  const tarea = tareas.find(t => t.id === id);
+  if (tarea) {
+    tarea.completada = !tarea.completada;
+    guardarTareas();
+    renderizarTareas();
+  }
+}
+
+// Eliminar tarea
+function eliminarTarea(id) {
+  tareas = tareas.filter(t => t.id !== id);
+  guardarTareas();
+  renderizarTareas();
+}
+
+// Renderizar tareas
+function renderizarTareas() {
+  const lista = document.getElementById('lista-tareas');
+  lista.innerHTML = '';
+  
+  if (tareas.length === 0) {
+    lista.innerHTML = '<p class="vacio">No hay tareas. ¡Agrega una!</p>';
+    return;
+  }
+  
+  tareas.forEach(tarea => {
+    const li = document.createElement('li');
+    li.className = tarea.completada ? 'completada' : '';
+    
+    li.innerHTML = `
+      <input type="checkbox" ${tarea.completada ? 'checked' : ''} 
+             onchange="toggleTarea(${tarea.id})">
+      <span class="texto">${tarea.texto}</span>
+      <button onclick="eliminarTarea(${tarea.id})" class="btn-eliminar">Eliminar</button>
+    `;
+    
+    lista.appendChild(li);
+  });
+  
+  // Actualizar contador
+  const completadas = tareas.filter(t => t.completada).length;
+  document.getElementById('contador').textContent = 
+    `${completadas} de ${tareas.length} completadas`;
+}
+
+// Event listeners
+document.getElementById('form-tarea').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = document.getElementById('input-tarea');
+  const texto = input.value.trim();
+  
+  if (texto) {
+    agregarTarea(texto);
+    input.value = '';
+  }
+});
+
+// Cargar al iniciar
+window.addEventListener('DOMContentLoaded', () => {
+  tareas = cargarTareas();
+  renderizarTareas();
+});
+```
+
+## Ejemplo: Carrito de Compras
+
+```javascript
+const CARRITO_KEY = 'carrito_compras';
+
+// Obtener carrito
+function obtenerCarrito() {
+  const carrito = localStorage.getItem(CARRITO_KEY);
+  return carrito ? JSON.parse(carrito) : [];
+}
+
+// Guardar carrito
+function guardarCarrito(items) {
+  localStorage.setItem(CARRITO_KEY, JSON.stringify(items));
+}
+
+// Agregar al carrito
+function agregarAlCarrito(producto) {
+  const carrito = obtenerCarrito();
+  
+  // Verificar si ya existe
+  const existente = carrito.find(item => item.id === producto.id);
+  
+  if (existente) {
+    existente.cantidad++;
+  } else {
+    carrito.push({
+      ...producto,
+      cantidad: 1
+    });
+  }
+  
+  guardarCarrito(carrito);
+  actualizarUI();
+  mostrarNotificacion(`${producto.nombre} agregado al carrito`);
+}
+
+// Remover del carrito
+function removerDelCarrito(productoId) {
+  let carrito = obtenerCarrito();
+  carrito = carrito.filter(item => item.id !== productoId);
+  guardarCarrito(carrito);
+  actualizarUI();
+}
+
+// Actualizar cantidad
+function actualizarCantidad(productoId, cantidad) {
+  const carrito = obtenerCarrito();
+  const item = carrito.find(item => item.id === productoId);
+  
+  if (item) {
+    if (cantidad <= 0) {
+      removerDelCarrito(productoId);
+    } else {
+      item.cantidad = cantidad;
+      guardarCarrito(carrito);
+      actualizarUI();
+    }
+  }
+}
+
+// Calcular total
+function calcularTotal() {
+  const carrito = obtenerCarrito();
+  return carrito.reduce((total, item) => {
+    return total + (item.precio * item.cantidad);
+  }, 0);
+}
+
+// Vaciar carrito
+function vaciarCarrito() {
+  if (confirm('¿Seguro que quieres vaciar el carrito?')) {
+    localStorage.removeItem(CARRITO_KEY);
+    actualizarUI();
+  }
+}
+
+// Actualizar UI
+function actualizarUI() {
+  const carrito = obtenerCarrito();
+  const contenedor = document.getElementById('carrito');
+  const badge = document.getElementById('carrito-badge');
+  
+  // Actualizar badge con cantidad total
+  const cantidadTotal = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+  badge.textContent = cantidadTotal;
+  badge.style.display = cantidadTotal > 0 ? 'block' : 'none';
+  
+  // Renderizar items
+  if (carrito.length === 0) {
+    contenedor.innerHTML = '<p>Carrito vacío</p>';
+    return;
+  }
+  
+  contenedor.innerHTML = carrito.map(item => `
+    <div class="carrito-item">
+      <img src="${item.imagen}" alt="${item.nombre}">
+      <div>
+        <h4>${item.nombre}</h4>
+        <p>$${item.precio}</p>
+      </div>
+      <input type="number" value="${item.cantidad}" min="1" 
+             onchange="actualizarCantidad(${item.id}, this.value)">
+      <button onclick="removerDelCarrito(${item.id})">Eliminar</button>
+    </div>
+  `).join('');
+  
+  // Mostrar total
+  document.getElementById('total').textContent = `Total: $${calcularTotal().toFixed(2)}`;
+}
+
+// Inicializar
+window.addEventListener('DOMContentLoaded', actualizarUI);
+```
+
+## Ejemplo: Caché de Datos con Expiración
+
+```javascript
+function guardarConExpiracion(clave, datos, minutos) {
+  const item = {
+    datos: datos,
+    expira: Date.now() + (minutos * 60 * 1000)
+  };
+  
+  localStorage.setItem(clave, JSON.stringify(item));
+}
+
+function obtenerConExpiracion(clave) {
+  const itemStr = localStorage.getItem(clave);
+  
+  if (!itemStr) {
+    return null;
+  }
+  
+  const item = JSON.parse(itemStr);
+  
+  // Verificar si expiró
+  if (Date.now() > item.expira) {
+    localStorage.removeItem(clave);
+    return null;
+  }
+  
+  return item.datos;
+}
+
+// Uso con fetch
+async function obtenerUsuariosConCache() {
+  const CACHE_KEY = 'usuarios';
+  const CACHE_MINUTOS = 5;
+  
+  // Intentar obtener del cache
+  const cached = obtenerConExpiracion(CACHE_KEY);
+  
+  if (cached) {
+    console.log('Usando cache');
+    return cached;
+  }
+  
+  // Si no hay cache, obtener del servidor
+  console.log('Obteniendo del servidor');
+  const response = await fetch('https://jsonplaceholder.typicode.com/users');
+  const datos = await response.json();
+  
+  // Guardar en cache por 5 minutos
+  guardarConExpiracion(CACHE_KEY, datos, CACHE_MINUTOS);
+  
+  return datos;
+}
+```
+
+## Helpers Reutilizables
+
+```javascript
+// Helper para localStorage
+const storage = {
+  get(key, defaultValue = null) {
+    const item = localStorage.getItem(key);
+    if (!item) return defaultValue;
+    
+    try {
+      return JSON.parse(item);
+    } catch {
+      return item;
+    }
+  },
+  
+  set(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  },
+  
+  remove(key) {
+    localStorage.removeItem(key);
+  },
+  
+  clear() {
+    localStorage.clear();
+  },
+  
+  has(key) {
+    return localStorage.getItem(key) !== null;
+  }
+};
+
+// Helper para sessionStorage
+const session = {
+  get(key, defaultValue = null) {
+    const item = sessionStorage.getItem(key);
+    if (!item) return defaultValue;
+    
+    try {
+      return JSON.parse(item);
+    } catch {
+      return item;
+    }
+  },
+  
+  set(key, value) {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  },
+  
+  remove(key) {
+    sessionStorage.removeItem(key);
+  },
+  
+  clear() {
+    sessionStorage.clear();
+  },
+  
+  has(key) {
+    return sessionStorage.getItem(key) !== null;
+  }
+};
+
+// Uso
+storage.set('usuario', { nombre: 'Juan', edad: 25 });
+const usuario = storage.get('usuario');
+console.log(usuario.nombre); // 'Juan'
+```
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="localStorage" icon="database" href="/storage/local-storage">
+    Repasa los fundamentos de localStorage
+  </Card>
+  <Card title="sessionStorage" icon="clock" href="/storage/session-storage">
+    Aprende más sobre sessionStorage
+  </Card>
+</CardGroup>

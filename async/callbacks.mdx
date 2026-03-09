@@ -1,0 +1,323 @@
+---
+title: Callbacks
+description: Entiende cómo funcionan los callbacks en JavaScript
+---
+
+# Callbacks
+
+Un **callback** es una función que se pasa como argumento a otra función y se ejecuta después de que esa función termine su trabajo. Es el patrón más básico para manejar operaciones asíncronas en JavaScript.
+
+## ¿Qué es un Callback?
+
+Un callback es simplemente una función que se ejecuta "después" de otra operación:
+
+```javascript
+const callBackButton = document.getElementById("callback");
+
+callBackButton.addEventListener("click", function () {
+  function saludar(nombre, callback) {
+    console.log("Hola " + nombre);
+    callback();
+  }
+
+  function despedir() {
+    console.log("Adiós!");
+  }
+
+  saludar("Julián", despedir);
+});
+```
+
+**Salida:**
+```
+Hola Julián
+Adiós!
+```
+
+### Desglose del Ejemplo
+
+<Steps>
+  <Step title="saludar acepta dos parámetros">
+    - `nombre`: un string
+    - `callback`: una función que se ejecutará después
+  </Step>
+
+  <Step title="saludar hace su trabajo">
+    Imprime el saludo con el nombre.
+  </Step>
+
+  <Step title="saludar ejecuta el callback">
+    Llama a `callback()`, que ejecuta la función `despedir`.
+  </Step>
+</Steps>
+
+<Note>
+Los callbacks son funciones regulares. Lo especial es **cuándo** y **dónde** se ejecutan.
+</Note>
+
+## Callbacks con Funciones Anónimas
+
+No necesitas definir el callback por separado. Puedes usar una función anónima:
+
+```javascript
+saludar("María", function() {
+  console.log("Hasta luego!");
+});
+```
+
+O con arrow functions (sintaxis moderna):
+
+```javascript
+saludar("Carlos", () => {
+  console.log("¡Nos vemos!");
+});
+```
+
+## Callbacks Asíncronos
+
+Los callbacks realmente brillan con operaciones asíncronas como `setTimeout`:
+
+```javascript
+function mostrarMensaje(mensaje, callback) {
+  setTimeout(() => {
+    console.log(mensaje);
+    callback();
+  }, 2000);
+}
+
+mostrarMensaje("Cargando...", () => {
+  console.log("¡Listo!");
+});
+
+// Salida después de 2 segundos:
+// Cargando...
+// ¡Listo!
+```
+
+## Callbacks con Parámetros
+
+Los callbacks pueden recibir parámetros:
+
+```javascript
+function procesarUsuario(userId, callback) {
+  // Simular obtener datos de usuario
+  setTimeout(() => {
+    const usuario = {
+      id: userId,
+      nombre: "Juan",
+      email: "juan@example.com"
+    };
+    callback(usuario);
+  }, 1000);
+}
+
+procesarUsuario(123, (usuario) => {
+  console.log("Usuario:", usuario.nombre);
+  console.log("Email:", usuario.email);
+});
+```
+
+## Callbacks para Manejo de Errores
+
+Una convención común es pasar el error como primer parámetro del callback:
+
+```javascript
+function obtenerDatos(url, callback) {
+  setTimeout(() => {
+    const error = Math.random() > 0.5 ? null : new Error("Error de red");
+    const datos = error ? null : { resultado: "Datos exitosos" };
+    
+    callback(error, datos);
+  }, 1000);
+}
+
+obtenerDatos('/api/users', (error, datos) => {
+  if (error) {
+    console.error('Hubo un error:', error.message);
+    return;
+  }
+  console.log('Datos recibidos:', datos);
+});
+```
+
+<Tip>
+Este patrón "error-first callback" es muy común en Node.js y bibliotecas JavaScript.
+</Tip>
+
+## El Problema: Callback Hell
+
+Cuando necesitas realizar múltiples operaciones asíncronas en secuencia, los callbacks pueden volverse difíciles de manejar:
+
+```javascript
+const hellButton = document.getElementById("hell-button");
+
+hellButton.addEventListener("click", function () {
+  setTimeout(() => {
+    console.log("Primer paso");
+    setTimeout(() => {
+      console.log("Segundo paso");
+      setTimeout(() => {
+        console.log("Tercer paso");
+      }, 1000);
+    }, 1000);
+  }, 1000);
+});
+```
+
+**Problemas con este código:**
+- Difícil de leer (forma de "pirámide")
+- Difícil de mantener
+- Difícil de manejar errores
+- Difícil de agregar nuevos pasos
+
+<Warning>
+Este patrón se conoce como **"Callback Hell"** o **"Pyramid of Doom"**. Es una señal de que necesitas refactorizar tu código.
+</Warning>
+
+### Un Ejemplo Más Real de Callback Hell
+
+```javascript
+// Ejemplo conceptual (pseudocódigo)
+getUser(userId, function(user) {
+  getOrders(user, function(orders) {
+    processOrders(orders, function(processed) {
+      sendEmail(processed, function(confirmation) {
+        console.log("Order Processed:", confirmation);
+      });
+    });
+  });
+});
+```
+
+Cada nivel de indentación hace el código más difícil de seguir.
+
+## Buenas Prácticas con Callbacks
+
+### 1. Usa Funciones con Nombre
+
+En lugar de funciones anónimas anidadas:
+
+```javascript
+// ❌ Mal: Difícil de leer
+setTimeout(() => {
+  console.log("Paso 1");
+  setTimeout(() => {
+    console.log("Paso 2");
+  }, 1000);
+}, 1000);
+
+// ✅ Mejor: Funciones con nombre
+function paso1() {
+  console.log("Paso 1");
+  setTimeout(paso2, 1000);
+}
+
+function paso2() {
+  console.log("Paso 2");
+}
+
+setTimeout(paso1, 1000);
+```
+
+### 2. Maneja Errores Apropiadamente
+
+```javascript
+function operacionAsincrona(callback) {
+  setTimeout(() => {
+    try {
+      // Operación que puede fallar
+      const resultado = operacionPeligrosa();
+      callback(null, resultado);
+    } catch (error) {
+      callback(error, null);
+    }
+  }, 1000);
+}
+
+operacionAsincrona((error, resultado) => {
+  if (error) {
+    console.error('Error:', error);
+    return;
+  }
+  console.log('Resultado:', resultado);
+});
+```
+
+### 3. Mantén los Callbacks Simples
+
+```javascript
+// ❌ Mal: Callback con mucha lógica
+cargarDatos((datos) => {
+  // 50 líneas de lógica compleja...
+});
+
+// ✅ Mejor: Callback llama a una función separada
+cargarDatos(procesarDatos);
+
+function procesarDatos(datos) {
+  // Lógica compleja aquí...
+}
+```
+
+## Callbacks en Funciones de Array
+
+Los callbacks también se usan en métodos de array:
+
+```javascript
+const numeros = [1, 2, 3, 4, 5];
+
+// forEach recibe un callback
+numeros.forEach(function(numero) {
+  console.log(numero * 2);
+});
+
+// map recibe un callback y retorna un nuevo array
+const duplicados = numeros.map(function(numero) {
+  return numero * 2;
+});
+
+// filter recibe un callback que retorna true/false
+const pares = numeros.filter(function(numero) {
+  return numero % 2 === 0;
+});
+```
+
+## Cuándo Usar Callbacks
+
+<AccordionGroup>
+  <Accordion title="✅ Buenos Casos de Uso">
+    - Operaciones asíncronas **simples** y **únicas**
+    - Event listeners
+    - Métodos de array (map, filter, forEach)
+    - APIs que solo soportan callbacks
+  </Accordion>
+
+  <Accordion title="❌ Cuándo Evitarlos">
+    - Múltiples operaciones asíncronas en secuencia
+    - Lógica compleja de manejo de errores
+    - Cuando necesitas coordinar múltiples operaciones asíncronas
+    - En código moderno (usa Promises o async/await en su lugar)
+  </Accordion>
+</AccordionGroup>
+
+## La Evolución: De Callbacks a Promises
+
+Los callbacks fueron la primera solución para el asincronismo en JavaScript, pero tienen limitaciones. Por eso se crearon las **Promises**, que resuelven muchos de los problemas de los callbacks.
+
+<Tip>
+En código nuevo, prefiere Promises o async/await sobre callbacks anidados. Sin embargo, entender callbacks es fundamental porque:
+- Muchas APIs aún los usan
+- Necesitas entenderlos para trabajar con código existente
+- Son la base para entender Promises y async/await
+</Tip>
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="Promises" icon="handshake" href="/async/promises">
+    Aprende cómo Promises mejoran el manejo asíncrono
+  </Card>
+  <Card title="Async/Await" icon="star" href="/async/async-await">
+    La sintaxis más moderna para código asíncrono
+  </Card>
+</CardGroup>

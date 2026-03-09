@@ -1,0 +1,414 @@
+---
+title: sessionStorage
+description: Aprende a usar sessionStorage para almacenamiento temporal en el navegador
+---
+
+# sessionStorage
+
+**sessionStorage** es similar a localStorage, pero los datos solo persisten durante la sesión de la pestaña del navegador. Cuando cierras la pestaña o ventana, los datos se eliminan automáticamente.
+
+## ¿Qué es sessionStorage?
+
+sessionStorage es un almacenamiento clave-valor que:
+
+- 📋 Almacena datos como strings
+- 🕒 Vive solo en la pestaña actual
+- 🚪 Se borra al cerrar la pestaña/ventana
+- 🔒 Es específico del dominio
+- 📏 Tiene el mismo límite que localStorage (~5-10MB)
+- 🌐 Es síncrono
+
+<Note>
+Vive solo en la pestaña actual; se borra al cerrar la pestaña/ventana. Perfecto para datos temporales de una sesión de navegación.
+</Note>
+
+## Diferencias con localStorage
+
+| Aspecto | localStorage | sessionStorage |
+|---------|--------------|----------------|
+| **Duración** | Permanente | Solo la sesión |
+| **Alcance** | Todas las pestañas del mismo dominio | Solo la pestaña actual |
+| **Persiste al recargar** | ✅ Sí | ✅ Sí |
+| **Persiste al cerrar pestaña** | ✅ Sí | ❌ No |
+| **Compartido entre pestañas** | ✅ Sí | ❌ No |
+
+## Métodos Principales
+
+sessionStorage tiene exactamente la misma API que localStorage:
+
+### setItem() - Guardar Datos
+
+```javascript
+const SS_USER_KEY = "demoUserSS";
+const SS_EMAIL_KEY = "demoEmailSS";
+
+const btnSsCreate = document.getElementById("ss-create");
+
+btnSsCreate.addEventListener("click", function () {
+  sessionStorage.setItem(SS_USER_KEY, "summer");
+  sessionStorage.setItem(SS_EMAIL_KEY, "summer@example.com");
+  console.log("[SS] creado: { user: summer, email: summer@example.com }");
+});
+```
+
+### getItem() - Leer Datos
+
+```javascript
+const btnSsShow = document.getElementById("ss-show");
+
+btnSsShow.addEventListener("click", function () {
+  var user = sessionStorage.getItem(SS_USER_KEY);
+  var email = sessionStorage.getItem(SS_EMAIL_KEY);
+  console.log("[SS] user: " + user + ", email: " + email);
+});
+```
+
+### removeItem() - Eliminar Dato
+
+```javascript
+const btnSsDelete = document.getElementById("ss-delete");
+
+btnSsDelete.addEventListener("click", function () {
+  sessionStorage.removeItem(SS_USER_KEY);
+  sessionStorage.removeItem(SS_EMAIL_KEY);
+  console.log("[SS] eliminado: demoUserSS/demoEmailSS borrados");
+});
+```
+
+### Actualizar Datos
+
+Al igual que localStorage, verifica si existen datos antes de actualizar:
+
+```javascript
+const btnSsUpdate = document.getElementById("ss-update");
+
+btnSsUpdate.addEventListener("click", function () {
+  var user = sessionStorage.getItem(SS_USER_KEY);
+  var email = sessionStorage.getItem(SS_EMAIL_KEY);
+  if (user === null && email === null) {
+    console.log("[SS] Nada que actualizar. Primero crea los datos.");
+    return;
+  }
+  sessionStorage.setItem(SS_USER_KEY, "beth");
+  sessionStorage.setItem(SS_EMAIL_KEY, "beth@example.com");
+  console.log("[SS] modificado: { user: beth, email: beth@example.com }");
+});
+```
+
+## Almacenar Objetos y Arrays
+
+Igual que localStorage, usa JSON:
+
+```javascript
+// Guardar objeto
+const formulario = {
+  paso: 2,
+  datos: {
+    nombre: 'Juan',
+    email: 'juan@example.com'
+  }
+};
+
+sessionStorage.setItem('formulario', JSON.stringify(formulario));
+
+// Leer objeto
+const formularioString = sessionStorage.getItem('formulario');
+if (formularioString) {
+  const formulario = JSON.parse(formularioString);
+  console.log('Paso actual:', formulario.paso);
+}
+```
+
+## Casos de Uso Comunes
+
+<AccordionGroup>
+  <Accordion title="Formularios Multi-Paso">
+    Perfecto para guardar el progreso en formularios largos:
+    
+    ```javascript
+    // Guardar progreso del formulario
+    function guardarProgreso(paso, datos) {
+      sessionStorage.setItem('formularioPaso', paso);
+      sessionStorage.setItem('formularioDatos', JSON.stringify(datos));
+    }
+    
+    // Restaurar al recargar la página
+    function restaurarProgreso() {
+      const paso = sessionStorage.getItem('formularioPaso');
+      const datos = sessionStorage.getItem('formularioDatos');
+      
+      if (paso && datos) {
+        mostrarPaso(parseInt(paso));
+        rellenarFormulario(JSON.parse(datos));
+      }
+    }
+    
+    // Limpiar al enviar
+    function enviarFormulario() {
+      // ... enviar datos
+      sessionStorage.removeItem('formularioPaso');
+      sessionStorage.removeItem('formularioDatos');
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Estado de Navegación">
+    Guardar el estado actual de la aplicación:
+    
+    ```javascript
+    // Guardar qué tab está activa
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        const tabId = e.target.dataset.tabId;
+        sessionStorage.setItem('activeTab', tabId);
+      });
+    });
+    
+    // Restaurar al recargar
+    window.addEventListener('DOMContentLoaded', () => {
+      const activeTab = sessionStorage.getItem('activeTab');
+      if (activeTab) {
+        document.querySelector(`[data-tab-id="${activeTab}"]`).click();
+      }
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Datos de Sesión Temporal">
+    Para datos que no deben persistir después de cerrar:
+    
+    ```javascript
+    // Token de autenticación temporal
+    function iniciarSesion(token) {
+      sessionStorage.setItem('sessionToken', token);
+    }
+    
+    function obtenerToken() {
+      return sessionStorage.getItem('sessionToken');
+    }
+    
+    function cerrarSesion() {
+      sessionStorage.removeItem('sessionToken');
+      // Redirigir al login
+    }
+    
+    // El token se borra automáticamente al cerrar la pestaña
+    ```
+  </Accordion>
+
+  <Accordion title="Carrito de Compras Temporal">
+    ```javascript
+    function agregarAlCarrito(producto) {
+      const carrito = obtenerCarrito();
+      carrito.push(producto);
+      sessionStorage.setItem('carrito', JSON.stringify(carrito));
+    }
+    
+    function obtenerCarrito() {
+      const carrito = sessionStorage.getItem('carrito');
+      return carrito ? JSON.parse(carrito) : [];
+    }
+    
+    function vaciarCarrito() {
+      sessionStorage.removeItem('carrito');
+    }
+    
+    // El carrito se borra al cerrar la pestaña
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Comportamiento con Pestañas
+
+### Pestañas Independientes
+
+```javascript
+// En pestaña 1:
+sessionStorage.setItem('mensaje', 'Hola desde pestaña 1');
+
+// En pestaña 2 (mismo dominio):
+console.log(sessionStorage.getItem('mensaje')); // null
+// Cada pestaña tiene su propio sessionStorage
+```
+
+### Duplicar Pestaña
+
+```javascript
+// En pestaña original:
+sessionStorage.setItem('contador', '5');
+
+// Al duplicar la pestaña (Ctrl+Shift+T o clic derecho > Duplicar):
+// La nueva pestaña COPIA el sessionStorage de la original
+console.log(sessionStorage.getItem('contador')); // "5"
+
+// Pero son independientes después:
+sessionStorage.setItem('contador', '10'); // Solo en la nueva pestaña
+```
+
+<Note>
+Al duplicar una pestaña, el sessionStorage se copia, pero luego las pestañas son independientes.
+</Note>
+
+## Comparación Lado a Lado
+
+<Tabs>
+  <Tab title="localStorage">
+    ```javascript
+    // Guardar
+    localStorage.setItem('tema', 'oscuro');
+    
+    // Leer
+    const tema = localStorage.getItem('tema');
+    
+    // ✅ Persiste al cerrar el navegador
+    // ✅ Compartido entre pestañas
+    // ✅ Persiste indefinidamente
+    ```
+    
+    **Usa para:**
+    - Preferencias del usuario
+    - Datos que deben persistir
+    - Configuraciones de la aplicación
+  </Tab>
+
+  <Tab title="sessionStorage">
+    ```javascript
+    // Guardar
+    sessionStorage.setItem('paso', '2');
+    
+    // Leer
+    const paso = sessionStorage.getItem('paso');
+    
+    // ❌ Se borra al cerrar la pestaña
+    // ❌ NO compartido entre pestañas
+    // ✅ Persiste en recargas
+    ```
+    
+    **Usa para:**
+    - Estado temporal de formularios
+    - Datos de sesión actual
+    - Información que no debe persistir
+  </Tab>
+</Tabs>
+
+## Eventos de Storage
+
+El evento `storage` NO se dispara para sessionStorage en otras pestañas (porque cada pestaña tiene su propio almacenamiento):
+
+```javascript
+// Esto solo funciona con localStorage entre pestañas
+window.addEventListener('storage', (e) => {
+  console.log('Storage cambió:', e.key, e.newValue);
+  // NO se dispara para sessionStorage
+});
+```
+
+## Buenas Prácticas
+
+<Steps>
+  <Step title="Usa sessionStorage para datos temporales">
+    ```javascript
+    // ✅ Bien: Datos que no deben persistir
+    sessionStorage.setItem('formularioTemp', JSON.stringify(datos));
+    
+    // ❌ Mal: Preferencias del usuario (usa localStorage)
+    sessionStorage.setItem('tema', 'oscuro');
+    ```
+  </Step>
+
+  <Step title="Limpia datos cuando ya no los necesites">
+    ```javascript
+    function enviarFormulario(datos) {
+      // Enviar datos al servidor
+      fetch('/api/submit', {
+        method: 'POST',
+        body: JSON.stringify(datos)
+      })
+      .then(() => {
+        // Limpiar sessionStorage después de enviar
+        sessionStorage.removeItem('formularioDatos');
+        sessionStorage.removeItem('formularioPaso');
+      });
+    }
+    ```
+  </Step>
+
+  <Step title="Combina con localStorage cuando sea apropiado">
+    ```javascript
+    // Guardar token de sesión temporalmente
+    sessionStorage.setItem('sessionToken', token);
+    
+    // Pero guardar preferencias permanentemente
+    localStorage.setItem('preferencias', JSON.stringify(prefs));
+    ```
+  </Step>
+</Steps>
+
+## Funciones Helper Reutilizables
+
+```javascript
+const session = {
+  get(key) {
+    const item = sessionStorage.getItem(key);
+    try {
+      return JSON.parse(item);
+    } catch {
+      return item;
+    }
+  },
+  
+  set(key, value) {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  },
+  
+  remove(key) {
+    sessionStorage.removeItem(key);
+  },
+  
+  clear() {
+    sessionStorage.clear();
+  },
+  
+  has(key) {
+    return sessionStorage.getItem(key) !== null;
+  }
+};
+
+// Uso
+session.set('formulario', { paso: 2, datos: {...} });
+const formulario = session.get('formulario');
+
+if (session.has('formulario')) {
+  console.log('Hay datos guardados');
+}
+```
+
+## Cuándo Usar Cada Uno
+
+<CardGroup cols={2}>
+  <Card title="Usa localStorage" icon="database">
+    - Preferencias de usuario
+    - Tema (claro/oscuro)
+    - Configuración de idioma
+    - Caché de datos
+    - Datos que deben persistir
+  </Card>
+  <Card title="Usa sessionStorage" icon="clock">
+    - Formularios multi-paso
+    - Estado de navegación temporal
+    - Carrito de compras temporal
+    - Tokens de sesión
+    - Datos que NO deben persistir
+  </Card>
+</CardGroup>
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="localStorage" icon="database" href="/storage/local-storage">
+    Vuelve a localStorage para comparar
+  </Card>
+  <Card title="Ejemplos de Storage" icon="code" href="/examples/storage-examples">
+    Ve ejemplos completos de ambos tipos de storage
+  </Card>
+</CardGroup>

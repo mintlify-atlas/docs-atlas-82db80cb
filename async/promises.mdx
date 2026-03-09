@@ -1,0 +1,407 @@
+---
+title: Promises
+description: Aprende a usar Promises para manejar operaciones asíncronas en JavaScript
+---
+
+# Promises
+
+Una **Promise** (promesa) es un objeto que representa el resultado eventual de una operación asíncrona. Las Promises hacen el código asíncrono más fácil de leer y mantener que los callbacks anidados.
+
+## ¿Qué es una Promise?
+
+Una Promise es un objeto que puede estar en uno de tres estados:
+
+- **Pending** (⏳ Pendiente): Estado inicial, la operación aún no ha terminado
+- **Fulfilled** (✅ Cumplida): La operación se completó exitosamente
+- **Rejected** (❌ Rechazada): La operación falló
+
+```javascript
+const promise = new Promise((resolve, reject) => {
+  // Operación asíncrona aquí
+});
+
+console.log(promise); // Promise { <pending> }
+```
+
+<Note>
+Una vez que una Promise está fulfilled o rejected, su estado no puede cambiar. Se dice que está "settled" (resuelta).
+</Note>
+
+## Crear una Promise
+
+Para crear una Promise, usas el constructor `Promise` con una función que recibe dos parámetros: `resolve` y `reject`.
+
+### Promise Resuelta (Fulfilled)
+
+```javascript
+const resolvePromiseBtn = document.getElementById("promise-resolved");
+
+resolvePromiseBtn.addEventListener("click", function () {
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve("✅ Operación exitosa");
+    }, 2000);
+  });
+
+  console.log(promise);
+
+  promise
+    .then((mensaje) => console.log(mensaje))
+    .catch((error) => console.log(error));
+});
+```
+
+**Flujo de ejecución:**
+1. Se crea la Promise (estado: pending)
+2. Se imprime la Promise en la consola (muestra `Promise { <pending> }`)
+3. Después de 2 segundos, se llama a `resolve()`
+4. La Promise cambia a estado fulfilled
+5. Se ejecuta el callback en `.then()`
+6. Se imprime "✅ Operación exitosa"
+
+### Promise Rechazada (Rejected)
+
+```javascript
+const rejectPromiseBtn = document.getElementById("promise-rejected");
+
+rejectPromiseBtn.addEventListener("click", function () {
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject("❌ Hubo un error");
+    }, 2000);
+  });
+
+  promise
+    .then((mensaje) => console.log(mensaje))
+    .catch((error) => console.log(error));
+});
+```
+
+**Flujo de ejecución:**
+1. Se crea la Promise
+2. Después de 2 segundos, se llama a `reject()`
+3. La Promise cambia a estado rejected
+4. Se salta el `.then()` y se ejecuta `.catch()`
+5. Se imprime "❌ Hubo un error"
+
+<Warning>
+Si una Promise es rejected y no tienes un `.catch()`, obtendrás un error "Unhandled Promise Rejection" en la consola.
+</Warning>
+
+## Consumir Promises: .then() y .catch()
+
+Una vez que tienes una Promise, la "consumes" con `.then()` y `.catch()`:
+
+```javascript
+promise
+  .then((resultado) => {
+    // Se ejecuta si la Promise se resuelve exitosamente
+    console.log('Exitoso:', resultado);
+  })
+  .catch((error) => {
+    // Se ejecuta si la Promise es rechazada
+    console.error('Error:', error);
+  });
+```
+
+### Métodos de Promise
+
+<AccordionGroup>
+  <Accordion title=".then(onFulfilled, onRejected)">
+    Recibe dos funciones opcionales:
+    - La primera se ejecuta si la Promise es fulfilled
+    - La segunda se ejecuta si la Promise es rejected
+    
+    ```javascript
+    promise.then(
+      (resultado) => console.log('Exitoso:', resultado),
+      (error) => console.error('Error:', error)
+    );
+    ```
+    
+    **Retorna una nueva Promise**, lo que permite encadenar.
+  </Accordion>
+
+  <Accordion title=".catch(onRejected)">
+    Maneja errores. Es equivalente a `.then(null, onRejected)`.
+    
+    ```javascript
+    promise.catch((error) => {
+      console.error('Error:', error);
+    });
+    ```
+    
+    También retorna una Promise, permitiendo encadenar más.
+  </Accordion>
+
+  <Accordion title=".finally(onFinally)">
+    Se ejecuta siempre, sin importar si la Promise fue fulfilled o rejected.
+    
+    ```javascript
+    promise
+      .then(resultado => console.log(resultado))
+      .catch(error => console.error(error))
+      .finally(() => console.log('Operación completada'));
+    ```
+    
+    Útil para limpieza (ej: cerrar spinners de carga).
+  </Accordion>
+</AccordionGroup>
+
+## Encadenar Promises
+
+Una de las grandes ventajas de las Promises es que puedes encadenarlas:
+
+```javascript
+fetch('/api/user/1')
+  .then((response) => {
+    console.log('Respuesta recibida');
+    return response.json(); // Retorna otra Promise
+  })
+  .then((data) => {
+    console.log('Datos parseados:', data);
+    return procesarDatos(data); // Retorna otra Promise
+  })
+  .then((resultado) => {
+    console.log('Datos procesados:', resultado);
+  })
+  .catch((error) => {
+    console.error('Error en cualquier paso:', error);
+  });
+```
+
+**Ventajas sobre callbacks:**
+- Código más plano (no hay pirámide de callbacks)
+- Un solo `.catch()` maneja errores de todos los pasos
+- Más fácil de leer y mantener
+
+<Tip>
+Cada `.then()` retorna una nueva Promise. Si retornas un valor, se envuelve automáticamente en una Promise resuelta.
+</Tip>
+
+## Ejemplo: De Callbacks a Promises
+
+### Con Callbacks (Callback Hell)
+
+```javascript
+getUser(userId, (error, user) => {
+  if (error) {
+    console.error(error);
+    return;
+  }
+  getOrders(user.id, (error, orders) => {
+    if (error) {
+      console.error(error);
+      return;
+    }
+    processOrders(orders, (error, result) => {
+      if (error) {
+        console.error(error);
+        return;
+      }
+      console.log('Resultado:', result);
+    });
+  });
+});
+```
+
+### Con Promises
+
+```javascript
+getUser(userId)
+  .then(user => getOrders(user.id))
+  .then(orders => processOrders(orders))
+  .then(result => console.log('Resultado:', result))
+  .catch(error => console.error(error));
+```
+
+¡Mucho más limpio y fácil de leer!
+
+## Promise.all(): Múltiples Promises en Paralelo
+
+Cuando necesitas esperar a que varias Promises terminen:
+
+```javascript
+const promesa1 = fetch('/api/users');
+const promesa2 = fetch('/api/products');
+const promesa3 = fetch('/api/orders');
+
+Promise.all([promesa1, promesa2, promesa3])
+  .then(([usuarios, productos, ordenes]) => {
+    console.log('Todas las peticiones completadas');
+    console.log('Usuarios:', usuarios);
+    console.log('Productos:', productos);
+    console.log('Ordenes:', ordenes);
+  })
+  .catch(error => {
+    console.error('Al menos una petición falló:', error);
+  });
+```
+
+**Características:**
+- Espera a que **todas** las Promises se resuelvan
+- Si **cualquiera** falla, `Promise.all()` es rejected inmediatamente
+- Retorna un array con todos los resultados en el mismo orden
+
+## Otros Métodos de Promise
+
+<Tabs>
+  <Tab title="Promise.race()">
+    Retorna la Promise que termine primero (fulfilled o rejected).
+    
+    ```javascript
+    const promesa1 = new Promise(resolve => setTimeout(() => resolve('Lento'), 2000));
+    const promesa2 = new Promise(resolve => setTimeout(() => resolve('Rápido'), 1000));
+    
+    Promise.race([promesa1, promesa2])
+      .then(resultado => console.log(resultado)); // "Rápido"
+    ```
+    
+    Útil para timeouts o racing conditions.
+  </Tab>
+
+  <Tab title="Promise.allSettled()">
+    Espera a que todas las Promises terminen, sin importar si son fulfilled o rejected.
+    
+    ```javascript
+    const promesa1 = Promise.resolve('Exitoso');
+    const promesa2 = Promise.reject('Error');
+    const promesa3 = Promise.resolve('Otro exitoso');
+    
+    Promise.allSettled([promesa1, promesa2, promesa3])
+      .then(resultados => {
+        resultados.forEach(resultado => {
+          if (resultado.status === 'fulfilled') {
+            console.log('Exitoso:', resultado.value);
+          } else {
+            console.log('Rechazado:', resultado.reason);
+          }
+        });
+      });
+    ```
+  </Tab>
+
+  <Tab title="Promise.any()">
+    Retorna la primera Promise que sea fulfilled. Ignora las rejected.
+    
+    ```javascript
+    const promesa1 = Promise.reject('Error 1');
+    const promesa2 = new Promise(resolve => setTimeout(() => resolve('Exitoso'), 1000));
+    const promesa3 = Promise.reject('Error 2');
+    
+    Promise.any([promesa1, promesa2, promesa3])
+      .then(resultado => console.log(resultado)); // "Exitoso"
+    ```
+  </Tab>
+</Tabs>
+
+## Manejo de Errores
+
+### Un .catch() para Todos
+
+```javascript
+fetch('/api/data')
+  .then(response => response.json())
+  .then(data => procesarDatos(data))
+  .then(resultado => mostrarResultado(resultado))
+  .catch(error => {
+    // Maneja errores de CUALQUIERA de los pasos anteriores
+    console.error('Error en alguna parte:', error);
+  });
+```
+
+### .catch() en el Medio
+
+```javascript
+fetch('/api/data')
+  .then(response => response.json())
+  .catch(error => {
+    console.error('Error al obtener datos:', error);
+    return { default: true }; // Valor por defecto
+  })
+  .then(data => {
+    // Se ejecuta incluso si hubo error arriba
+    console.log('Datos:', data);
+  });
+```
+
+<Note>
+Si un `.catch()` no lanza un error, la cadena continúa normalmente. Esto permite recuperarse de errores.
+</Note>
+
+## Crear Promises de Valores
+
+```javascript
+// Promise resuelta inmediatamente
+const promesaResuelta = Promise.resolve('Valor');
+
+// Promise rechazada inmediatamente
+const promesaRechazada = Promise.reject(new Error('Error'));
+
+// Útil para convertir valores en Promises
+function obtenerDatos(cache) {
+  if (cache) {
+    return Promise.resolve(cache); // Retorna Promise
+  }
+  return fetch('/api/data'); // También retorna Promise
+}
+```
+
+## Buenas Prácticas
+
+<Steps>
+  <Step title="Siempre maneja errores">
+    ```javascript
+    // ❌ Mal: Sin .catch()
+    fetch('/api/data').then(handleData);
+    
+    // ✅ Bien: Con .catch()
+    fetch('/api/data')
+      .then(handleData)
+      .catch(handleError);
+    ```
+  </Step>
+
+  <Step title="Retorna Promises en cadenas">
+    ```javascript
+    // ❌ Mal: No retorna
+    promise.then(() => {
+      otraPromise(); // Esta Promise se ignora
+    });
+    
+    // ✅ Bien: Retorna la Promise
+    promise.then(() => {
+      return otraPromise(); // Se encadena correctamente
+    });
+    ```
+  </Step>
+
+  <Step title="Evita mezclar callbacks y Promises">
+    ```javascript
+    // ❌ Confuso: Mezcla callbacks con Promises
+    fetch('/api/data').then(data => {
+      setTimeout(() => {
+        procesarDatos(data, (resultado) => {
+          // ...
+        });
+      }, 1000);
+    });
+    
+    // ✅ Mejor: Todo con Promises
+    fetch('/api/data')
+      .then(data => esperarUnSegundo())
+      .then(() => procesarDatosPromise(data));
+    ```
+  </Step>
+</Steps>
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="Async/Await" icon="star" href="/async/async-await">
+    Aprende la sintaxis más moderna para trabajar con Promises
+  </Card>
+  <Card title="Fetch API" icon="cloud" href="/http/fetch-api">
+    Usa Promises para hacer peticiones HTTP
+  </Card>
+</CardGroup>

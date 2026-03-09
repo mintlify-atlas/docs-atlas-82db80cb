@@ -1,0 +1,361 @@
+---
+title: Event Listeners
+description: Maneja interacciones del usuario con event listeners en JavaScript
+---
+
+# Event Listeners
+
+Los **event listeners** permiten que tu aplicación web responda a las acciones del usuario como clicks, teclas presionadas, movimientos del mouse y más. Son fundamentales para crear interfaces interactivas.
+
+## ¿Qué es un Event Listener?
+
+Un event listener es una función que "escucha" un evento específico en un elemento y ejecuta código cuando ese evento ocurre.
+
+```javascript
+elemento.addEventListener(tipoDeEvento, funcionManejadora);
+```
+
+## Eventos Click
+
+El evento más común es el click del mouse.
+
+```javascript
+var clickCount = 0;
+
+function configurarEventos() {
+    console.log('Configurando eventos...');
+    // Evento click
+    document.getElementById('btn-click').addEventListener('click', function() {
+        clickCount++;
+        document.getElementById('resultado').textContent = 'Botón clickeado ' + clickCount + ' veces';
+        console.log('Click número:', clickCount);
+    });
+}
+```
+
+### Estructura del Event Listener
+
+<Steps>
+  <Step title="Seleccionar el elemento">
+    Primero, selecciona el elemento que quieres escuchar.
+    
+    ```javascript
+    const boton = document.getElementById('btn-click');
+    ```
+  </Step>
+
+  <Step title="Agregar el listener">
+    Usa `addEventListener` con el tipo de evento y la función manejadora.
+    
+    ```javascript
+    boton.addEventListener('click', function() {
+        console.log('¡Click!');
+    });
+    ```
+  </Step>
+
+  <Step title="Ejecutar lógica">
+    Dentro de la función manejadora, escribe el código que debe ejecutarse.
+    
+    ```javascript
+    boton.addEventListener('click', function() {
+        const resultado = document.getElementById('resultado');
+        resultado.textContent = '¡Botón presionado!';
+    });
+    ```
+  </Step>
+</Steps>
+
+## Eventos de Input
+
+El evento `input` se dispara cada vez que el valor de un campo de entrada cambia.
+
+```javascript
+// Evento input
+document.getElementById('input-change').addEventListener('input', function(e) {
+    var valor = e.target.value;
+    document.getElementById('resultado').textContent = 'Escribiste: ' + valor;
+    console.log('Input cambió a:', valor);
+});
+```
+
+### El Objeto Event
+
+La función manejadora recibe un objeto `event` (comúnmente llamado `e` o `evt`) con información sobre el evento:
+
+```javascript
+input.addEventListener('input', function(e) {
+    console.log('Tipo de evento:', e.type);          // 'input'
+    console.log('Elemento que disparó:', e.target);  // El elemento input
+    console.log('Valor actual:', e.target.value);     // El texto escrito
+});
+```
+
+<Note>
+`e.target` siempre apunta al elemento que disparó el evento, independientemente de dónde esté adjunto el listener.
+</Note>
+
+## Eventos Focus y Blur
+
+Estos eventos se disparan cuando un elemento gana o pierde el foco.
+
+```javascript
+// Evento blur (cuando pierde el foco)
+var inputBlur = document.getElementById('input-blur');
+inputBlur.addEventListener('blur', function(e) {
+    var valor = e.target.value;
+    inputBlur.style.borderColor = 'red';
+    inputBlur.style.borderWidth = '2px';
+    document.getElementById('resultado').textContent = 'Perdió el foco. Valor: ' + valor;
+    console.log('Input perdió el foco con valor:', valor);
+});
+
+// Evento focus (cuando recibe el foco)
+inputBlur.addEventListener('focus', function() {
+    inputBlur.style.borderColor = '';
+    inputBlur.style.borderWidth = '';
+    document.getElementById('resultado').textContent = 'Campo enfocado - escribe algo';
+    console.log('Input recibió el foco');
+});
+```
+
+### Casos de Uso
+
+<AccordionGroup>
+  <Accordion title="Validación de Formularios">
+    Usa `blur` para validar campos cuando el usuario termina de escribir.
+    
+    ```javascript
+    emailInput.addEventListener('blur', function(e) {
+        const email = e.target.value;
+        if (!email.includes('@')) {
+            e.target.style.borderColor = 'red';
+            mostrarError('Email inválido');
+        }
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Indicadores Visuales">
+    Usa `focus` para destacar el campo activo.
+    
+    ```javascript
+    input.addEventListener('focus', function(e) {
+        e.target.classList.add('activo');
+        e.target.parentElement.classList.add('campo-activo');
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Guardar Datos">
+    Usa `blur` para guardar cambios automáticamente.
+    
+    ```javascript
+    textarea.addEventListener('blur', function(e) {
+        localStorage.setItem('borrador', e.target.value);
+        console.log('Borrador guardado');
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Tipos Comunes de Eventos
+
+### Eventos de Mouse
+
+<Tabs>
+  <Tab title="Click">
+    ```javascript
+    elemento.addEventListener('click', function(e) {
+        console.log('Click en:', e.clientX, e.clientY);
+    });
+    ```
+  </Tab>
+
+  <Tab title="Double Click">
+    ```javascript
+    elemento.addEventListener('dblclick', function() {
+        console.log('Doble click');
+    });
+    ```
+  </Tab>
+
+  <Tab title="Mouse Over / Out">
+    ```javascript
+    elemento.addEventListener('mouseover', function() {
+        this.style.backgroundColor = 'lightblue';
+    });
+    
+    elemento.addEventListener('mouseout', function() {
+        this.style.backgroundColor = '';
+    });
+    ```
+  </Tab>
+
+  <Tab title="Mouse Down / Up">
+    ```javascript
+    elemento.addEventListener('mousedown', function() {
+        console.log('Botón del mouse presionado');
+    });
+    
+    elemento.addEventListener('mouseup', function() {
+        console.log('Botón del mouse soltado');
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### Eventos de Teclado
+
+```javascript
+// Detectar tecla presionada
+input.addEventListener('keydown', function(e) {
+    console.log('Tecla presionada:', e.key);
+    
+    // Detectar tecla Enter
+    if (e.key === 'Enter') {
+        console.log('¡Enter presionado!');
+        e.preventDefault(); // Prevenir comportamiento por defecto
+    }
+});
+
+// Detectar tecla soltada
+input.addEventListener('keyup', function(e) {
+    console.log('Tecla soltada:', e.key);
+});
+```
+
+### Eventos de Formulario
+
+```javascript
+// Evento submit
+formulario.addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevenir envío por defecto
+    console.log('Formulario enviado');
+    // Procesar datos del formulario
+});
+
+// Evento change (para selects, checkboxes, radios)
+select.addEventListener('change', function(e) {
+    console.log('Opción seleccionada:', e.target.value);
+});
+```
+
+<Warning>
+Siempre usa `e.preventDefault()` en eventos `submit` si vas a manejar el envío con JavaScript. De lo contrario, la página se recargará.
+</Warning>
+
+## Inicialización de Eventos
+
+Es importante esperar a que el DOM esté completamente cargado antes de agregar event listeners:
+
+```javascript
+// INICIALIZACIÓN
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Clase de Manipulación del DOM iniciada');
+
+    document.getElementById('btn-get-by-id').addEventListener('click', demoGetById);
+    document.getElementById('btn-get-by-class').addEventListener('click', demoGetByClass);
+    document.getElementById('btn-query-selector').addEventListener('click', demoQuerySelector);
+    document.getElementById('btn-create').addEventListener('click', demoCreate);
+    document.getElementById('btn-remove').addEventListener('click', demoRemove);
+
+    configurarEventos();
+});
+```
+
+### Alternativas para Esperar el DOM
+
+<Tabs>
+  <Tab title="DOMContentLoaded">
+    Se dispara cuando el HTML está completamente cargado y parseado.
+    
+    ```javascript
+    document.addEventListener('DOMContentLoaded', function() {
+        // Código aquí
+    });
+    ```
+  </Tab>
+
+  <Tab title="defer en script">
+    Agrega el atributo `defer` a tu etiqueta `<script>` en el HTML.
+    
+    ```html
+    <script src="script.js" defer></script>
+    ```
+    
+    El script se ejecutará después de que el DOM esté listo.
+  </Tab>
+
+  <Tab title="Script al final del body">
+    Coloca tu `<script>` al final del `<body>`.
+    
+    ```html
+    <body>
+        <!-- contenido HTML -->
+        <script src="script.js"></script>
+    </body>
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+La opción más moderna y recomendada es usar el atributo `defer` en la etiqueta script.
+</Tip>
+
+## Remover Event Listeners
+
+Puedes remover un event listener cuando ya no lo necesites:
+
+```javascript
+function handleClick() {
+    console.log('Click');
+}
+
+// Agregar listener
+boton.addEventListener('click', handleClick);
+
+// Remover listener
+boton.removeEventListener('click', handleClick);
+```
+
+<Note>
+Para remover un listener, debes pasar la misma función que usaste al agregarlo. Por eso es útil usar funciones con nombre en lugar de funciones anónimas.
+</Note>
+
+## Event Delegation
+
+Cuando tienes muchos elementos similares, es más eficiente agregar un solo listener al padre:
+
+```javascript
+// En lugar de esto (ineficiente)
+const items = document.querySelectorAll('.item');
+items.forEach(item => {
+    item.addEventListener('click', handleClick);
+});
+
+// Haz esto (eficiente)
+const lista = document.getElementById('lista');
+lista.addEventListener('click', function(e) {
+    // Verificar si el click fue en un item
+    if (e.target.classList.contains('item')) {
+        handleClick(e);
+    }
+});
+```
+
+**Ventajas:**
+- Un solo listener en lugar de muchos
+- Funciona automáticamente con elementos agregados dinámicamente
+- Mejor rendimiento en listas grandes
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="JavaScript Asíncrono" icon="clock" href="/async/introduction">
+    Aprende a manejar operaciones asíncronas
+  </Card>
+  <Card title="Ejemplos del DOM" icon="code" href="/examples/dom-examples">
+    Ve ejemplos completos de manipulación del DOM
+  </Card>
+</CardGroup>

@@ -1,0 +1,243 @@
+---
+title: Manipulación del DOM
+description: Aprende a seleccionar, crear y modificar elementos HTML con JavaScript
+---
+
+# Manipulación del DOM
+
+El **Document Object Model (DOM)** es una interfaz de programación que representa la estructura de un documento HTML como un árbol de objetos. JavaScript puede acceder y modificar estos objetos para cambiar dinámicamente el contenido, estructura y estilo de una página web.
+
+## ¿Qué es el DOM?
+
+Cuando el navegador carga una página HTML, crea un modelo de objetos del documento. Este modelo es una representación en memoria de la estructura de la página:
+
+```javascript
+console.log('DOM', document);
+```
+
+El objeto `document` es el punto de entrada al DOM y representa todo el documento HTML.
+
+<Note>
+El DOM no es JavaScript - es una API web que JavaScript puede usar para interactuar con HTML y XML.
+</Note>
+
+## Modificar Contenido de Elementos
+
+Una vez que has seleccionado un elemento, puedes modificar su contenido y propiedades.
+
+### Cambiar Texto
+
+```javascript
+function demoGetById() {
+    var elemento = document.getElementById('texto-ejemplo');
+    elemento.textContent = 'Texto cambiado con getElementById';
+    elemento.style.color = 'blue';
+    console.log('getElementById:', elemento);
+}
+```
+
+**Propiedades disponibles:**
+- `textContent` - Texto plano sin formato HTML
+- `innerHTML` - Contenido HTML (puede incluir etiquetas)
+- `innerText` - Similar a textContent pero respeta el CSS (no muestra elementos ocultos)
+
+<Warning>
+Usa `textContent` en lugar de `innerHTML` cuando trabajes con texto simple para evitar vulnerabilidades de seguridad (XSS).
+</Warning>
+
+### Modificar Estilos
+
+Puedes cambiar los estilos CSS directamente desde JavaScript:
+
+```javascript
+function demoGetByClass() {
+    var elementos = document.getElementsByClassName('destacado');
+    console.log('getElementsByClassName encontró:', elementos.length, 'elementos');
+
+    for (var i = 0; i < elementos.length; i++) {
+        elementos[i].style.backgroundColor = 'orange';
+        elementos[i].style.color = 'white';
+    }
+}
+```
+
+<Tip>
+Los nombres de propiedades CSS en JavaScript usan camelCase: `background-color` se convierte en `backgroundColor`.
+</Tip>
+
+## Crear Nuevos Elementos
+
+Puedes crear elementos HTML dinámicamente y agregarlos al DOM.
+
+```javascript
+function demoCreate() {
+    // Crear nuevo párrafo
+    var nuevoP = document.createElement('p');
+    nuevoP.textContent = 'Párrafo creado con createElement()';
+    nuevoP.style.backgroundColor = 'lightblue';
+
+    // Añadir al contenedor
+    contenedor.appendChild(nuevoP);
+    console.log('Elemento creado y añadido:', nuevoP);
+
+    // Alternativa: insertar en posiciones específicas
+    contenedor.insertAdjacentElement('beforeend', nuevoP);
+}
+```
+
+### Métodos de Inserción
+
+<AccordionGroup>
+  <Accordion title="appendChild()">
+    Agrega un elemento como último hijo del elemento padre.
+    
+    ```javascript
+    padre.appendChild(nuevoElemento);
+    ```
+  </Accordion>
+
+  <Accordion title="insertAdjacentElement()">
+    Inserta un elemento en una posición relativa al elemento de referencia.
+    
+    ```javascript
+    elemento.insertAdjacentElement('beforeend', nuevoElemento);
+    ```
+    
+    Posiciones disponibles:
+    - `'beforebegin'` - Antes del elemento
+    - `'afterbegin'` - Como primer hijo
+    - `'beforeend'` - Como último hijo
+    - `'afterend'` - Después del elemento
+  </Accordion>
+
+  <Accordion title="insertBefore()">
+    Inserta un elemento antes de un hijo específico.
+    
+    ```javascript
+    padre.insertBefore(nuevoElemento, elementoReferencia);
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Eliminar Elementos
+
+Puedes remover elementos del DOM cuando ya no los necesites.
+
+```javascript
+function demoRemove() {
+    var lista = document.getElementById('lista-items');
+    var item = document.getElementById('item-remover');
+
+    if (item) {
+        lista.removeChild(item);
+        console.log('Elemento removido');
+    }
+}
+```
+
+### Métodos de Eliminación
+
+<Tabs>
+  <Tab title="removeChild()">
+    Remueve un hijo específico del elemento padre.
+    
+    ```javascript
+    padre.removeChild(hijo);
+    ```
+  </Tab>
+
+  <Tab title="remove()">
+    El elemento se elimina a sí mismo (método más moderno).
+    
+    ```javascript
+    elemento.remove();
+    ```
+  </Tab>
+</Tabs>
+
+## Modificar Atributos
+
+Puedes leer y modificar atributos HTML de los elementos.
+
+```javascript
+// Obtener un atributo
+const valor = elemento.getAttribute('data-id');
+
+// Establecer un atributo
+elemento.setAttribute('data-id', '123');
+
+// Verificar si existe un atributo
+if (elemento.hasAttribute('disabled')) {
+    // ...
+}
+
+// Remover un atributo
+elemento.removeAttribute('disabled');
+```
+
+## Modificar Clases CSS
+
+Manipular clases CSS es una forma común de cambiar estilos:
+
+```javascript
+// Agregar una clase
+elemento.classList.add('activo');
+
+// Remover una clase
+elemento.classList.remove('inactivo');
+
+// Alternar una clase (agregar si no existe, remover si existe)
+elemento.classList.toggle('destacado');
+
+// Verificar si tiene una clase
+if (elemento.classList.contains('activo')) {
+    // ...
+}
+```
+
+<Tip>
+Usa `classList` en lugar de manipular directamente `className` - es más seguro y conveniente.
+</Tip>
+
+## Ejemplo Completo
+
+Aquí hay un ejemplo que combina varios conceptos:
+
+```javascript
+// Seleccionar el contenedor
+const contenedor = document.getElementById('contenedor');
+
+// Crear un nuevo elemento
+const tarjeta = document.createElement('div');
+tarjeta.classList.add('tarjeta');
+
+// Agregar contenido
+const titulo = document.createElement('h3');
+titulo.textContent = 'Nueva Tarjeta';
+
+const descripcion = document.createElement('p');
+descripcion.textContent = 'Esta tarjeta fue creada dinámicamente.';
+
+// Construir la estructura
+tarjeta.appendChild(titulo);
+tarjeta.appendChild(descripcion);
+
+// Agregar al DOM
+contenedor.appendChild(tarjeta);
+
+// Modificar estilos
+tarjeta.style.padding = '1rem';
+tarjeta.style.border = '1px solid #ddd';
+tarjeta.style.borderRadius = '5px';
+```
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="Selectores" icon="magnifying-glass" href="/fundamentals/selectors">
+    Aprende todos los métodos para seleccionar elementos
+  </Card>
+  <Card title="Event Listeners" icon="hand-pointer" href="/fundamentals/event-listeners">
+    Maneja interacciones del usuario con eventos
+  </Card>
+</CardGroup>

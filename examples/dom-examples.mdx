@@ -1,0 +1,283 @@
+---
+title: Ejemplos del DOM
+description: Ejemplos completos de manipulación del DOM en acción
+---
+
+# Ejemplos Completos del DOM
+
+Esta sección muestra cómo combinar selectores, manipulación de elementos y eventos en ejemplos prácticos completos.
+
+## Ejemplo 1: Sistema de Botones Interactivos
+
+Este ejemplo muestra cómo cambiar elementos usando diferentes métodos de selección:
+
+```javascript
+// Seleccionar elementos
+const btnGetById = document.getElementById('btn-get-by-id');
+const btnGetByClass = document.getElementById('btn-get-by-class');
+const btnQuerySelector = document.getElementById('btn-query-selector');
+
+// Función para cambiar texto y color por ID
+function demoGetById() {
+    var elemento = document.getElementById('texto-ejemplo');
+    elemento.textContent = 'Texto cambiado con getElementById';
+    elemento.style.color = 'blue';
+    console.log('getElementById:', elemento);
+}
+
+// Función para cambiar múltiples elementos por clase
+function demoGetByClass() {
+    var elementos = document.getElementsByClassName('destacado');
+    console.log('getElementsByClassName encontró:', elementos.length, 'elementos');
+
+    for (var i = 0; i < elementos.length; i++) {
+        elementos[i].style.backgroundColor = 'orange';
+        elementos[i].style.color = 'white';
+    }
+}
+
+// Función para usar querySelector
+function demoQuerySelector() {
+    var primerItem = document.querySelector('.item');
+    primerItem.style.backgroundColor = 'lightgreen';
+    primerItem.textContent = 'Seleccionado con querySelector';
+    console.log('querySelector seleccionó:', primerItem);
+}
+
+// Agregar event listeners
+btnGetById.addEventListener('click', demoGetById);
+btnGetByClass.addEventListener('click', demoGetByClass);
+btnQuerySelector.addEventListener('click', demoQuerySelector);
+```
+
+<Tip>
+Este patrón de definir funciones separadas y luego asignarlas a eventos hace el código más limpio y reutilizable.
+</Tip>
+
+## Ejemplo 2: Crear y Añadir Elementos Dinámicamente
+
+```javascript
+function demoCreate() {
+    // Crear nuevo párrafo
+    var nuevoP = document.createElement('p');
+    nuevoP.textContent = 'Párrafo creado con createElement()';
+    nuevoP.style.backgroundColor = 'lightblue';
+
+    // Añadir al contenedor
+    var contenedor = document.getElementById('contenedor');
+    contenedor.appendChild(nuevoP);
+    console.log('Elemento creado y añadido:', nuevoP);
+
+    // Alternativa: insertar en posiciones específicas
+    contenedor.insertAdjacentElement('beforeend', nuevoP);
+}
+```
+
+### Ejemplo Completo: Generador de Tarjetas
+
+```javascript
+function crearTarjeta(titulo, descripcion) {
+    // Crear contenedor de la tarjeta
+    const tarjeta = document.createElement('div');
+    tarjeta.className = 'tarjeta';
+    
+    // Crear título
+    const h3 = document.createElement('h3');
+    h3.textContent = titulo;
+    
+    // Crear descripción
+    const p = document.createElement('p');
+    p.textContent = descripcion;
+    
+    // Crear botón
+    const boton = document.createElement('button');
+    boton.textContent = 'Ver más';
+    boton.addEventListener('click', () => {
+        alert(`Viendo: ${titulo}`);
+    });
+    
+    // Construir la tarjeta
+    tarjeta.appendChild(h3);
+    tarjeta.appendChild(p);
+    tarjeta.appendChild(boton);
+    
+    return tarjeta;
+}
+
+// Uso
+const contenedor = document.getElementById('tarjetas');
+const tarjeta1 = crearTarjeta('JavaScript', 'Lenguaje de programación web');
+const tarjeta2 = crearTarjeta('HTML', 'Lenguaje de marcado');
+
+contenedor.appendChild(tarjeta1);
+contenedor.appendChild(tarjeta2);
+```
+
+## Ejemplo 3: Sistema de Contador con Eventos
+
+```javascript
+var clickCount = 0;
+
+function configurarEventos() {
+    console.log('Configurando eventos...');
+    
+    // Evento click en botón
+    document.getElementById('btn-click').addEventListener('click', function() {
+        clickCount++;
+        document.getElementById('resultado').textContent = 'Botón clickeado ' + clickCount + ' veces';
+        console.log('Click número:', clickCount);
+    });
+
+    // Evento input - actualiza en tiempo real
+    document.getElementById('input-change').addEventListener('input', function(e) {
+        var valor = e.target.value;
+        document.getElementById('resultado').textContent = 'Escribiste: ' + valor;
+        console.log('Input cambió a:', valor);
+    });
+
+    // Eventos blur y focus
+    var inputBlur = document.getElementById('input-blur');
+    
+    inputBlur.addEventListener('blur', function(e) {
+        var valor = e.target.value;
+        inputBlur.style.borderColor = 'red';
+        inputBlur.style.borderWidth = '2px';
+        document.getElementById('resultado').textContent = 'Perdió el foco. Valor: ' + valor;
+        console.log('Input perdió el foco con valor:', valor);
+    });
+
+    inputBlur.addEventListener('focus', function() {
+        inputBlur.style.borderColor = '';
+        inputBlur.style.borderWidth = '';
+        document.getElementById('resultado').textContent = 'Campo enfocado - escribe algo';
+        console.log('Input recibió el foco');
+    });
+}
+```
+
+## Ejemplo 4: Lista de Tareas Interactiva
+
+Aquí un ejemplo completo que combina todos los conceptos:
+
+```javascript
+// Estado
+let tareas = [];
+let idCounter = 0;
+
+// Referencias a elementos
+const inputTarea = document.getElementById('input-tarea');
+const btnAgregar = document.getElementById('btn-agregar');
+const listaTareas = document.getElementById('lista-tareas');
+
+// Agregar tarea
+function agregarTarea() {
+    const texto = inputTarea.value.trim();
+    
+    if (texto === '') {
+        alert('Escribe una tarea');
+        return;
+    }
+    
+    const tarea = {
+        id: idCounter++,
+        texto: texto,
+        completada: false
+    };
+    
+    tareas.push(tarea);
+    renderizarTareas();
+    inputTarea.value = '';
+}
+
+// Marcar tarea como completada
+function toggleTarea(id) {
+    const tarea = tareas.find(t => t.id === id);
+    if (tarea) {
+        tarea.completada = !tarea.completada;
+        renderizarTareas();
+    }
+}
+
+// Eliminar tarea
+function eliminarTarea(id) {
+    tareas = tareas.filter(t => t.id !== id);
+    renderizarTareas();
+}
+
+// Renderizar lista
+function renderizarTareas() {
+    // Limpiar lista
+    listaTareas.innerHTML = '';
+    
+    // Crear elementos para cada tarea
+    tareas.forEach(tarea => {
+        const li = document.createElement('li');
+        li.className = tarea.completada ? 'completada' : '';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = tarea.completada;
+        checkbox.addEventListener('change', () => toggleTarea(tarea.id));
+        
+        const span = document.createElement('span');
+        span.textContent = tarea.texto;
+        
+        const btnEliminar = document.createElement('button');
+        btnEliminar.textContent = 'Eliminar';
+        btnEliminar.addEventListener('click', () => eliminarTarea(tarea.id));
+        
+        li.appendChild(checkbox);
+        li.appendChild(span);
+        li.appendChild(btnEliminar);
+        listaTareas.appendChild(li);
+    });
+}
+
+// Event listeners
+btnAgregar.addEventListener('click', agregarTarea);
+inputTarea.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        agregarTarea();
+    }
+});
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Aplicación de tareas iniciada');
+    renderizarTareas();
+});
+```
+
+## Ejemplo 5: Inicialización Completa
+
+Así es como se inicializa el proyecto real:
+
+```javascript
+// INICIALIZACIÓN
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Clase de Manipulación del DOM iniciada');
+
+    document.getElementById('btn-get-by-id').addEventListener('click', demoGetById);
+    document.getElementById('btn-get-by-class').addEventListener('click', demoGetByClass);
+    document.getElementById('btn-query-selector').addEventListener('click', demoQuerySelector);
+    document.getElementById('btn-create').addEventListener('click', demoCreate);
+    document.getElementById('btn-remove').addEventListener('click', demoRemove);
+
+    configurarEventos();
+});
+```
+
+<Note>
+Esperar a `DOMContentLoaded` asegura que todos los elementos HTML estén disponibles antes de intentar seleccionarlos.
+</Note>
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="Ejemplos Asíncronos" icon="clock" href="/examples/async-examples">
+    Ve ejemplos de programación asíncrona
+  </Card>
+  <Card title="Ejemplos de Fetch" icon="cloud" href="/examples/fetch-examples">
+    Aprende a obtener datos de APIs
+  </Card>
+</CardGroup>

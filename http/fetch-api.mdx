@@ -1,0 +1,398 @@
+---
+title: Fetch API
+description: Aprende a hacer peticiones HTTP con la Fetch API de JavaScript
+---
+
+# Fetch API
+
+La **Fetch API** proporciona una interfaz moderna para hacer peticiones HTTP desde el navegador. Es la forma estándar de comunicarse con servidores y obtener datos desde JavaScript.
+
+## ¿Qué es Fetch?
+
+`fetch()` es una función global que retorna una Promise. Te permite hacer peticiones HTTP de forma asíncrona:
+
+```javascript
+fetch('https://api.ejemplo.com/datos')
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));
+```
+
+<Note>
+Fetch reemplaza a la antigua API XMLHttpRequest (XHR). Es más simple, poderosa y usa Promises en lugar de callbacks.
+</Note>
+
+## Sintaxis Básica
+
+### Con Promises (.then)
+
+```javascript
+const url = "https://jsonplaceholder.typicode.com/users";
+
+function cargarUsuariosThen() {
+  usersOutput.textContent = "Cargando...";
+  fetch(url)
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("HTTP status " + response.status);
+      }
+      return response.json();
+    })
+    .then(function (data) {
+      console.log("Users (.then):", data);
+      printUsers(data);
+    })
+    .catch(function (error) {
+      console.log(error);
+      usersOutput.textContent = error;
+    });
+}
+```
+
+### Con Async/Await
+
+```javascript
+async function cargarUsuariosAsync() {
+  usersOutput.textContent = "Cargando...";
+  try {
+    var response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("HTTP status " + response.status);
+    }
+    var data = await response.json();
+    console.log("Users (async/await):", data);
+    printUsers(data);
+  } catch (error) {
+    console.log(error);
+    usersOutput.textContent = error;
+  }
+}
+```
+
+<Tip>
+El enfoque async/await es generalmente más fácil de leer y mantener, especialmente para operaciones múltiples.
+</Tip>
+
+## Hacer una Petición GET
+
+El método por defecto de fetch es GET:
+
+```javascript
+// Petición GET simple
+fetch('https://jsonplaceholder.typicode.com/users')
+  .then(response => response.json())
+  .then(users => {
+    console.log('Usuarios:', users);
+  });
+```
+
+### GET con Parámetros
+
+Para agregar parámetros de consulta, consérvelos en la URL:
+
+```javascript
+const userId = 1;
+const url = `https://jsonplaceholder.typicode.com/users/${userId}`;
+
+fetch(url)
+  .then(response => response.json())
+  .then(user => {
+    console.log('Usuario:', user);
+  });
+```
+
+O usa URLSearchParams para construir query strings:
+
+```javascript
+const params = new URLSearchParams({
+  page: 1,
+  limit: 10,
+  sort: 'name'
+});
+
+fetch(`https://api.ejemplo.com/users?${params}`)
+  .then(response => response.json())
+  .then(data => console.log(data));
+```
+
+## Hacer Peticiones POST
+
+Para enviar datos al servidor:
+
+```javascript
+const nuevoUsuario = {
+  name: 'Juan',
+  email: 'juan@example.com'
+};
+
+fetch('https://jsonplaceholder.typicode.com/users', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(nuevoUsuario)
+})
+  .then(response => response.json())
+  .then(data => {
+    console.log('Usuario creado:', data);
+  })
+  .catch(error => {
+    console.error('Error al crear usuario:', error);
+  });
+```
+
+### Opciones de Fetch
+
+El segundo parámetro de `fetch()` es un objeto de configuración:
+
+<AccordionGroup>
+  <Accordion title="method">
+    El método HTTP a usar.
+    
+    ```javascript
+    fetch(url, {
+      method: 'POST' // 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', etc.
+    })
+    ```
+  </Accordion>
+
+  <Accordion title="headers">
+    Cabeceras HTTP para enviar con la petición.
+    
+    ```javascript
+    fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer token123',
+        'Accept': 'application/json'
+      }
+    })
+    ```
+  </Accordion>
+
+  <Accordion title="body">
+    Datos a enviar (para POST, PUT, PATCH).
+    
+    ```javascript
+    fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Juan' })
+    })
+    ```
+    
+    También puede ser FormData, Blob, o texto plano.
+  </Accordion>
+
+  <Accordion title="credentials">
+    Si incluir cookies en la petición.
+    
+    ```javascript
+    fetch(url, {
+      credentials: 'include' // 'omit', 'same-origin', 'include'
+    })
+    ```
+  </Accordion>
+
+  <Accordion title="mode">
+    El modo CORS de la petición.
+    
+    ```javascript
+    fetch(url, {
+      mode: 'cors' // 'cors', 'no-cors', 'same-origin'
+    })
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Otros Métodos HTTP
+
+<Tabs>
+  <Tab title="PUT">
+    Actualizar un recurso completamente.
+    
+    ```javascript
+    fetch('https://api.ejemplo.com/users/1', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: 'Juan Actualizado',
+        email: 'juan.nuevo@example.com'
+      })
+    });
+    ```
+  </Tab>
+
+  <Tab title="PATCH">
+    Actualizar parcialmente un recurso.
+    
+    ```javascript
+    fetch('https://api.ejemplo.com/users/1', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: 'nuevo@example.com'
+      })
+    });
+    ```
+  </Tab>
+
+  <Tab title="DELETE">
+    Eliminar un recurso.
+    
+    ```javascript
+    fetch('https://api.ejemplo.com/users/1', {
+      method: 'DELETE'
+    })
+      .then(response => {
+        if (response.ok) {
+          console.log('Usuario eliminado');
+        }
+      });
+    ```
+  </Tab>
+</Tabs>
+
+## Ejemplo Completo del Proyecto
+
+Este es el ejemplo real de carga de usuarios del proyecto:
+
+```javascript
+const btnUsersThen = document.getElementById("users-then");
+const btnUsersAsync = document.getElementById("users-async");
+const usersOutput = document.getElementById("users-output");
+const url = "https://jsonplaceholder.typicode.com/users";
+
+function printUsers(usersList) {
+  var users = [];
+  for (var i = 0; i < usersList.length; i++) {
+    var user = usersList[i];
+    var userDataFormatted = user.id + " - " + user.name + " (" + user.email + ")";
+    users.push(userDataFormatted);
+  }
+  usersOutput.textContent = users.join("\n");
+}
+
+// Versión con .then
+function cargarUsuariosThen() {
+  usersOutput.textContent = "Cargando...";
+  fetch(url)
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("HTTP status " + response.status);
+      }
+      return response.json();
+    })
+    .then(function (data) {
+      console.log("Users (.then):", data);
+      printUsers(data);
+    })
+    .catch(function (error) {
+      console.log(error);
+      usersOutput.textContent = error;
+    });
+}
+
+btnUsersThen.addEventListener("click", cargarUsuariosThen);
+
+// Versión con async/await
+async function cargarUsuariosAsync() {
+  usersOutput.textContent = "Cargando...";
+  try {
+    var response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("HTTP status " + response.status);
+    }
+    var data = await response.json();
+    console.log("Users (async/await):", data);
+    printUsers(data);
+  } catch (error) {
+    console.log(error);
+    usersOutput.textContent = error;
+  }
+}
+
+btnUsersAsync.addEventListener("click", cargarUsuariosAsync);
+```
+
+## Buenas Prácticas
+
+<Steps>
+  <Step title="Verifica response.ok">
+    Fetch no rechaza la Promise en errores HTTP (404, 500, etc.). Debes verificar manualmente.
+    
+    ```javascript
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+    ```
+  </Step>
+
+  <Step title="Maneja errores de red">
+    Siempre usa try/catch o .catch() para errores de red.
+    
+    ```javascript
+    try {
+      const response = await fetch(url);
+      // ...
+    } catch (error) {
+      console.error('Error de red:', error);
+    }
+    ```
+  </Step>
+
+  <Step title="Muestra feedback al usuario">
+    Indica cuándo los datos están cargando.
+    
+    ```javascript
+    usersOutput.textContent = "Cargando...";
+    const data = await fetch(url).then(r => r.json());
+    usersOutput.textContent = JSON.stringify(data);
+    ```
+  </Step>
+
+  <Step title="Usa async/await para mejor legibilidad">
+    ```javascript
+    // ✅ Recomendado
+    async function cargarDatos() {
+      const response = await fetch(url);
+      const data = await response.json();
+      return data;
+    }
+    ```
+  </Step>
+</Steps>
+
+## APIs de Prueba
+
+Para practicar, puedes usar estas APIs públicas:
+
+<CardGroup cols={2}>
+  <Card title="JSONPlaceholder" icon="database" href="https://jsonplaceholder.typicode.com">
+    API falsa para pruebas con usuarios, posts, comentarios, etc.
+  </Card>
+  <Card title="ReqRes" icon="server" href="https://reqres.in">
+    API REST de prueba con respuestas realistas
+  </Card>
+  <Card title="Random User" icon="user" href="https://randomuser.me">
+    Genera usuarios aleatorios con fotos y datos completos
+  </Card>
+  <Card title="Open Weather" icon="cloud-sun" href="https://openweathermap.org/api">
+    Datos del clima en tiempo real (requiere API key gratuita)
+  </Card>
+</CardGroup>
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="Manejo de Respuestas" icon="check" href="/http/handling-responses">
+    Aprende a procesar diferentes tipos de respuestas
+  </Card>
+  <Card title="Ejemplos de Fetch" icon="code" href="/examples/fetch-examples">
+    Ve ejemplos completos de uso de Fetch
+  </Card>
+</CardGroup>

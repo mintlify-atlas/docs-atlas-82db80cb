@@ -1,0 +1,496 @@
+---
+title: Ejemplos de Fetch
+description: Ejemplos completos de uso de Fetch API con datos reales
+---
+
+# Ejemplos Completos de Fetch API
+
+Estos ejemplos muestran cómo usar Fetch API para obtener, mostrar y procesar datos de APIs reales.
+
+## Ejemplo Completo del Proyecto
+
+Este es el ejemplo real implementado en el proyecto que carga y muestra usuarios:
+
+```javascript
+const btnUsersThen = document.getElementById("users-then");
+const btnUsersAsync = document.getElementById("users-async");
+const usersOutput = document.getElementById("users-output");
+const url = "https://jsonplaceholder.typicode.com/users";
+
+function printUsers(usersList) {
+  var users = [];
+  for (var i = 0; i < usersList.length; i++) {
+    var user = usersList[i];
+    var userDataFormatted = user.id + " - " + user.name + " (" + user.email + ")";
+    users.push(userDataFormatted);
+  }
+  usersOutput.textContent = users.join("\n");
+}
+
+// Versión 1: Con .then()
+function cargarUsuariosThen() {
+  usersOutput.textContent = "Cargando...";
+  fetch(url)
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("HTTP status " + response.status);
+      }
+      return response.json();
+    })
+    .then(function (data) {
+      console.log("Users (.then):", data);
+      printUsers(data);
+    })
+    .catch(function (error) {
+      console.log(error);
+      usersOutput.textContent = error;
+    });
+}
+
+btnUsersThen.addEventListener("click", cargarUsuariosThen);
+
+// Versión 2: Con async/await
+async function cargarUsuariosAsync() {
+  usersOutput.textContent = "Cargando...";
+  try {
+    var response = await fetch(url);
+    if (!response.ok) {
+      throw new Error("HTTP status " + response.status);
+    }
+    var data = await response.json();
+    console.log("Users (async/await):", data);
+    printUsers(data);
+  } catch (error) {
+    console.log(error);
+    usersOutput.textContent = error;
+  }
+}
+
+btnUsersAsync.addEventListener("click", cargarUsuariosAsync);
+```
+
+<Note>
+Este ejemplo muestra ambas formas de manejar Promises: .then() y async/await. La versión async/await es generalmente más fácil de leer.
+</Note>
+
+## Ejemplo: Tarjetas de Usuario
+
+Créar tarjetas HTML dinámicas con datos de usuarios:
+
+```javascript
+async function cargarTarjetasUsuarios() {
+  const contenedor = document.getElementById('usuarios-contenedor');
+  contenedor.innerHTML = '<p>Cargando usuarios...</p>';
+  
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/users');
+    
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    
+    const usuarios = await response.json();
+    
+    // Limpiar el contenedor
+    contenedor.innerHTML = '';
+    
+    // Crear una tarjeta para cada usuario
+    usuarios.forEach(usuario => {
+      const tarjeta = document.createElement('div');
+      tarjeta.className = 'tarjeta-usuario';
+      
+      tarjeta.innerHTML = `
+        <h3>${usuario.name}</h3>
+        <p><strong>Email:</strong> ${usuario.email}</p>
+        <p><strong>Teléfono:</strong> ${usuario.phone}</p>
+        <p><strong>Ciudad:</strong> ${usuario.address.city}</p>
+        <button onclick="verDetalles(${usuario.id})">Ver más</button>
+      `;
+      
+      contenedor.appendChild(tarjeta);
+    });
+    
+  } catch (error) {
+    contenedor.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+    console.error('Error al cargar usuarios:', error);
+  }
+}
+```
+
+## Ejemplo: Buscar Usuario por ID
+
+```javascript
+async function buscarUsuario(id) {
+  const resultado = document.getElementById('resultado-busqueda');
+  resultado.textContent = 'Buscando...';
+  
+  try {
+    const response = await fetch(`https://jsonplaceholder.typicode.com/users/${id}`);
+    
+    if (response.status === 404) {
+      resultado.textContent = 'Usuario no encontrado';
+      return;
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    
+    const usuario = await response.json();
+    
+    resultado.innerHTML = `
+      <h3>${usuario.name}</h3>
+      <p>Email: ${usuario.email}</p>
+      <p>Usuario: @${usuario.username}</p>
+      <p>Sitio web: ${usuario.website}</p>
+    `;
+    
+  } catch (error) {
+    resultado.textContent = `Error: ${error.message}`;
+  }
+}
+
+// Event listener para el formulario de búsqueda
+document.getElementById('form-buscar').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const id = document.getElementById('input-id').value;
+  buscarUsuario(id);
+});
+```
+
+## Ejemplo: Cargar Múltiples Recursos
+
+```javascript
+async function cargarDashboard() {
+  const dashboard = document.getElementById('dashboard');
+  dashboard.innerHTML = '<p>Cargando dashboard...</p>';
+  
+  try {
+    // Cargar múltiples recursos en paralelo
+    const [usuarios, posts, comentarios] = await Promise.all([
+      fetch('https://jsonplaceholder.typicode.com/users').then(r => r.json()),
+      fetch('https://jsonplaceholder.typicode.com/posts').then(r => r.json()),
+      fetch('https://jsonplaceholder.typicode.com/comments').then(r => r.json())
+    ]);
+    
+    dashboard.innerHTML = `
+      <div class="stats">
+        <div class="stat-card">
+          <h3>Usuarios</h3>
+          <p class="stat-numero">${usuarios.length}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Posts</h3>
+          <p class="stat-numero">${posts.length}</p>
+        </div>
+        <div class="stat-card">
+          <h3>Comentarios</h3>
+          <p class="stat-numero">${comentarios.length}</p>
+        </div>
+      </div>
+    `;
+    
+    console.log('Dashboard cargado exitosamente');
+    
+  } catch (error) {
+    dashboard.innerHTML = `<p class="error">Error al cargar dashboard: ${error.message}</p>`;
+  }
+}
+```
+
+<Tip>
+Usar `Promise.all()` es mucho más rápido que esperar cada petición secuencialmente.
+</Tip>
+
+## Ejemplo: Crear Nuevo Recurso (POST)
+
+```javascript
+async function crearPost(titulo, contenido, userId) {
+  const resultado = document.getElementById('resultado-post');
+  resultado.textContent = 'Creando post...';
+  
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: titulo,
+        body: contenido,
+        userId: userId
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    
+    const nuevoPost = await response.json();
+    
+    resultado.innerHTML = `
+      <p class="exito">✅ Post creado exitosamente!</p>
+      <p>ID: ${nuevoPost.id}</p>
+      <p>Título: ${nuevoPost.title}</p>
+    `;
+    
+    console.log('Post creado:', nuevoPost);
+    
+  } catch (error) {
+    resultado.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+  }
+}
+
+// Formulario para crear post
+document.getElementById('form-crear-post').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const titulo = document.getElementById('titulo').value;
+  const contenido = document.getElementById('contenido').value;
+  
+  await crearPost(titulo, contenido, 1);
+  
+  // Limpiar formulario
+  e.target.reset();
+});
+```
+
+## Ejemplo: Actualizar Recurso (PUT)
+
+```javascript
+async function actualizarPost(id, datosActualizados) {
+  try {
+    const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(datosActualizados)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    
+    const postActualizado = await response.json();
+    console.log('Post actualizado:', postActualizado);
+    
+    return postActualizado;
+    
+  } catch (error) {
+    console.error('Error al actualizar:', error);
+    throw error;
+  }
+}
+
+// Uso
+actualizarPost(1, {
+  title: 'Título actualizado',
+  body: 'Contenido actualizado',
+  userId: 1
+}).then(post => {
+  console.log('Actualización exitosa:', post);
+});
+```
+
+## Ejemplo: Eliminar Recurso (DELETE)
+
+```javascript
+async function eliminarPost(id) {
+  const confirmacion = confirm(`¿Seguro que quieres eliminar el post ${id}?`);
+  
+  if (!confirmacion) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    
+    console.log(`Post ${id} eliminado exitosamente`);
+    
+    // Actualizar UI
+    const elemento = document.getElementById(`post-${id}`);
+    if (elemento) {
+      elemento.remove();
+    }
+    
+  } catch (error) {
+    alert(`Error al eliminar: ${error.message}`);
+  }
+}
+```
+
+## Ejemplo: Buscar con Filtros
+
+```javascript
+async function buscarPosts(filtros = {}) {
+  const contenedor = document.getElementById('posts-contenedor');
+  contenedor.innerHTML = '<p>Buscando...</p>';
+  
+  try {
+    // Construir URL con parámetros
+    const params = new URLSearchParams();
+    
+    if (filtros.userId) {
+      params.append('userId', filtros.userId);
+    }
+    if (filtros.limit) {
+      params.append('_limit', filtros.limit);
+    }
+    
+    const url = `https://jsonplaceholder.typicode.com/posts?${params}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status}`);
+    }
+    
+    const posts = await response.json();
+    
+    if (posts.length === 0) {
+      contenedor.innerHTML = '<p>No se encontraron posts</p>';
+      return;
+    }
+    
+    contenedor.innerHTML = '';
+    
+    posts.forEach(post => {
+      const div = document.createElement('div');
+      div.className = 'post';
+      div.innerHTML = `
+        <h4>${post.title}</h4>
+        <p>${post.body.substring(0, 100)}...</p>
+        <small>Usuario ID: ${post.userId}</small>
+      `;
+      contenedor.appendChild(div);
+    });
+    
+  } catch (error) {
+    contenedor.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+  }
+}
+
+// Uso
+buscarPosts({ userId: 1, limit: 5 });
+```
+
+## Ejemplo: Manejo Robusto de Errores
+
+```javascript
+async function fetchConManejoCompleto(url) {
+  const resultado = document.getElementById('resultado');
+  resultado.textContent = 'Cargando...';
+  
+  try {
+    // Agregar timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(url, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    // Verificar tipo de contenido
+    const contentType = response.headers.get('Content-Type');
+    
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('La respuesta no es JSON');
+    }
+    
+    // Verificar status
+    if (response.status === 404) {
+      resultado.textContent = 'Recurso no encontrado';
+      return null;
+    }
+    
+    if (response.status === 401) {
+      resultado.textContent = 'No autorizado - inicia sesión';
+      return null;
+    }
+    
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+    
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      resultado.textContent = 'Timeout: La petición tardó demasiado';
+    } else if (error.message.includes('Failed to fetch')) {
+      resultado.textContent = 'Error de red: verifica tu conexión';
+    } else {
+      resultado.textContent = `Error: ${error.message}`;
+    }
+    
+    console.error('Error completo:', error);
+    return null;
+  }
+}
+```
+
+## Ejemplo: Caché con localStorage
+
+Combinar Fetch con localStorage para reducir peticiones:
+
+```javascript
+async function obtenerUsuariosConCache() {
+  const CACHE_KEY = 'usuarios_cache';
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+  
+  // Intentar obtener del cache
+  const cached = localStorage.getItem(CACHE_KEY);
+  
+  if (cached) {
+    const { data, timestamp } = JSON.parse(cached);
+    const edad = Date.now() - timestamp;
+    
+    if (edad < CACHE_DURATION) {
+      console.log('Usando cache');
+      return data;
+    }
+  }
+  
+  // Si no hay cache o está expirado, obtener del servidor
+  console.log('Obteniendo del servidor');
+  const response = await fetch('https://jsonplaceholder.typicode.com/users');
+  const data = await response.json();
+  
+  // Guardar en cache
+  localStorage.setItem(CACHE_KEY, JSON.stringify({
+    data,
+    timestamp: Date.now()
+  }));
+  
+  return data;
+}
+
+// Uso
+obtenerUsuariosConCache().then(usuarios => {
+  console.log('Usuarios:', usuarios);
+});
+```
+
+<Warning>
+Cuidado con el tamaño de los datos que guardas en localStorage - tiene un límite de ~5-10MB.
+</Warning>
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="Ejemplos de Storage" icon="database" href="/examples/storage-examples">
+    Aprende a persistir datos en el navegador
+  </Card>
+  <Card title="Fetch API" icon="book" href="/http/fetch-api">
+    Repasa los fundamentos de Fetch
+  </Card>
+</CardGroup>

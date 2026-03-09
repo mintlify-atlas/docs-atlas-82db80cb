@@ -1,0 +1,240 @@
+---
+title: Introducción al Asincronismo
+description: Entiende cómo JavaScript maneja operaciones asíncronas
+---
+
+# Introducción al Asincronismo
+
+JavaScript es un lenguaje de programación de **un solo hilo** (single-threaded), lo que significa que solo puede ejecutar una tarea a la vez. Sin embargo, muchas operaciones como peticiones de red, lectura de archivos o temporizadores toman tiempo. El **asincronismo** permite que estas operaciones se ejecuten sin bloquear el resto del código.
+
+## El Problema: Código Bloqueante
+
+Cuando ejecutas una operación pesada de forma síncrona, bloqueas toda la aplicación:
+
+```javascript
+// Ejemplo de codigo sincronico bloqueante
+
+function heavyFunction() {
+  let count = 0;
+  for (let i = 0; i < 1000000000; i++) {
+    count++;
+  }
+  console.log("Desbloqueado");
+}
+
+const blockButton = document.getElementById("block");
+
+blockButton.addEventListener("click", function () {
+  console.log("First step");
+  heavyFunction();
+  console.log("Last Step");
+});
+```
+
+**Problema:** Mientras `heavyFunction()` se ejecuta, **todo** está bloqueado:
+- La interfaz no responde
+- No puedes hacer click en otros botones
+- La página se congela
+
+<Warning>
+El código bloqueante crea una experiencia de usuario terrible. Los usuarios pueden pensar que tu aplicación se rompió.
+</Warning>
+
+## La Solución: Código Asíncrono
+
+Las operaciones asíncronas permiten que el código pesado se ejecute "en segundo plano" sin bloquear:
+
+```javascript
+// Solucion del ejemplo anterior con asincronismo
+
+const noBlockButton = document.getElementById("no-block");
+
+noBlockButton.addEventListener("click", function () {
+  console.log("First step");
+  setTimeout(function () {
+    let count = 0;
+    for (let i = 0; i < 1000000000; i++) {
+      count++;
+    }
+    console.log("Desbloqueado");
+  }, 0);
+  console.log("Last Step");
+});
+```
+
+**Resultado en la consola:**
+```
+First step
+Last Step
+Desbloqueado
+```
+
+¡Nota cómo "Last Step" se imprime **antes** de "Desbloqueado"! Esto es asincronismo en acción.
+
+## setTimeout: Tu Primera Función Asíncrona
+
+`setTimeout` ejecuta una función después de un retraso especificado (en milisegundos):
+
+```javascript
+// SetTimeOut
+
+const timeOutButton = document.getElementById("timeout");
+
+timeOutButton.addEventListener("click", function () {
+  console.log("Inicio del programa");
+  setTimeout(() => {
+    console.log("Esto se ejecuta después de 2 segundos");
+  }, 2000);
+  console.log("Fin del programa");
+});
+```
+
+**Salida:**
+```
+Inicio del programa
+Fin del programa
+Esto se ejecuta después de 2 segundos
+```
+
+### ¿Por qué no se bloquea?
+
+<Steps>
+  <Step title="JavaScript ejecuta el código línea por línea">
+    Se imprime "Inicio del programa".
+  </Step>
+
+  <Step title="Encuentra setTimeout">
+    En lugar de esperar 2 segundos, JavaScript:
+    - Programa la función para ejecutarse después
+    - Continúa inmediatamente con la siguiente línea
+  </Step>
+
+  <Step title="Continúa la ejecución">
+    Se imprime "Fin del programa".
+  </Step>
+
+  <Step title="Después de 2 segundos">
+    La función programada se ejecuta e imprime "Esto se ejecuta después de 2 segundos".
+  </Step>
+</Steps>
+
+## El Event Loop
+
+JavaScript usa un **event loop** (bucle de eventos) para manejar asincronismo:
+
+```
+╭──────────────╮
+│  Call Stack  │ ← Código que se está ejecutando ahora
+╰──────────────╯
+        ↓
+╭──────────────╮
+│  Web APIs   │ ← setTimeout, fetch, etc.
+╰──────────────╯
+        ↓
+╭──────────────╮
+│ Callback    │ ← Funciones esperando ejecutarse
+│ Queue       │
+╰──────────────╯
+        ↓
+    Event Loop verifica:
+    ¿Call Stack vacío? → Mueve callback al Call Stack
+```
+
+### Cómo Funciona
+
+1. **Call Stack:** Donde se ejecuta el código actualmente
+2. **Web APIs:** Donde viven las funciones asíncronas (setTimeout, fetch, etc.)
+3. **Callback Queue:** Cola de funciones listas para ejecutarse
+4. **Event Loop:** Mueve funciones de la cola al call stack cuando está vacío
+
+<Note>
+Esto explica por qué `setTimeout(fn, 0)` no ejecuta la función inmediatamente - debe esperar a que el call stack esté vacío.
+</Note>
+
+## Operaciones Asíncronas Comunes
+
+<CardGroup cols={2}>
+  <Card title="Temporizadores" icon="clock">
+    `setTimeout()`, `setInterval()`
+  </Card>
+  <Card title="Peticiones de Red" icon="cloud">
+    `fetch()`, XMLHttpRequest
+  </Card>
+  <Card title="Eventos" icon="bolt">
+    Clicks, teclado, mouse
+  </Card>
+  <Card title="Sistema de Archivos" icon="file">
+    Lectura/escritura (en Node.js)
+  </Card>
+</CardGroup>
+
+## Por Qué Necesitamos Asincronismo
+
+<AccordionGroup>
+  <Accordion title="Peticiones HTTP">
+    Cuando pides datos a un servidor, puede tomar segundos. Sin asincronismo, tu aplicación se congelaría esperando la respuesta.
+    
+    ```javascript
+    // Sin asincronismo (bloqueante)
+    const datos = obtenerDatosDelServidor(); // Bloquea aquí por segundos
+    console.log(datos);
+    
+    // Con asincronismo (no bloqueante)
+    obtenerDatosDelServidor().then(datos => {
+        console.log(datos);
+    });
+    console.log('Esto se ejecuta inmediatamente');
+    ```
+  </Accordion>
+
+  <Accordion title="Interactividad">
+    Los usuarios esperan que las interfaces respondan instantáneamente. El asincronismo permite que la UI permanezca responsive mientras se procesa trabajo pesado.
+  </Accordion>
+
+  <Accordion title="Operaciones Paralelas">
+    Puedes iniciar múltiples operaciones asíncronas al mismo tiempo:
+    
+    ```javascript
+    // Iniciar 3 peticiones al mismo tiempo
+    const promesa1 = fetch('/api/usuarios');
+    const promesa2 = fetch('/api/productos');
+    const promesa3 = fetch('/api/ordenes');
+    
+    // Esperar a que todas terminen
+    Promise.all([promesa1, promesa2, promesa3]).then(resultados => {
+        console.log('Todas las peticiones completadas');
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Patrones Asíncronos en JavaScript
+
+JavaScript ofrece tres formas principales de manejar asincronismo:
+
+1. **Callbacks** - La forma original (puede llevar a "callback hell")
+2. **Promises** - Una mejor forma de manejar operaciones asíncronas
+3. **Async/Await** - La forma más moderna y legible
+
+Cada uno tiene sus ventajas y casos de uso. En las siguientes secciones, exploraremos cada uno en detalle.
+
+<Tip>
+La mayoría del código JavaScript moderno usa async/await, pero es importante entender callbacks y promises porque los verás en código existente.
+</Tip>
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="Callbacks" icon="arrow-right" href="/async/callbacks">
+    Aprende el patrón más básico de asincronismo
+  </Card>
+  <Card title="Promises" icon="handshake" href="/async/promises">
+    Descubre una mejor forma de manejar asincronismo
+  </Card>
+  <Card title="Async/Await" icon="star" href="/async/async-await">
+    La forma más moderna y limpia
+  </Card>
+  <Card title="Ejemplos Prácticos" icon="code" href="/examples/async-examples">
+    Ve ejemplos completos en acción
+  </Card>
+</CardGroup>

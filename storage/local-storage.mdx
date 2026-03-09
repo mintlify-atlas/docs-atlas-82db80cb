@@ -1,0 +1,464 @@
+---
+title: localStorage
+description: Aprende a persistir datos en el navegador con localStorage
+---
+
+# localStorage
+
+**localStorage** es una API del navegador que permite almacenar datos de forma permanente en el lado del cliente. Los datos persisten incluso después de cerrar el navegador, hasta que sean eliminados explícitamente.
+
+## ¿Qué es localStorage?
+
+localStorage es un almacenamiento clave-valor simple que:
+
+- 💾 Almacena datos como strings
+- ♾️ Persiste entre recargas y sesiones del navegador
+- 🔒 Es específico del dominio (cada sitio tiene su propio almacenamiento)
+- 📏 Tiene un límite de ~5-10MB (dependiendo del navegador)
+- 🌐 Es síncrono (bloquea la ejecución)
+
+<Note>
+Persiste entre recargas y pestañas; se mantiene hasta que el usuario lo borre manualmente o tu código lo elimine.
+</Note>
+
+## Métodos Principales
+
+localStorage ofrece cuatro métodos principales:
+
+### setItem() - Guardar Datos
+
+Guarda un par clave-valor:
+
+```javascript
+const LS_USER_KEY = "demoUser";
+const LS_EMAIL_KEY = "demoEmail";
+
+const btnLsCreate = document.getElementById("ls-create");
+
+btnLsCreate.addEventListener("click", function () {
+  localStorage.setItem(LS_USER_KEY, "rick");
+  localStorage.setItem(LS_EMAIL_KEY, "rick@example.com");
+  console.log("[LS] creado: { user: rick, email: rick@example.com }");
+});
+```
+
+**Sintaxis:**
+```javascript
+localStorage.setItem(clave, valor);
+```
+
+### getItem() - Leer Datos
+
+Recupera el valor asociado a una clave:
+
+```javascript
+const btnLsShow = document.getElementById("ls-show");
+
+btnLsShow.addEventListener("click", function () {
+  var user = localStorage.getItem(LS_USER_KEY);
+  var email = localStorage.getItem(LS_EMAIL_KEY);
+  console.log("[LS] user: " + user + ", email: " + email);
+});
+```
+
+**Sintaxis:**
+```javascript
+const valor = localStorage.getItem(clave);
+// Retorna null si la clave no existe
+```
+
+### removeItem() - Eliminar Dato
+
+Elimina un par clave-valor específico:
+
+```javascript
+const btnLsDelete = document.getElementById("ls-delete");
+
+btnLsDelete.addEventListener("click", function () {
+  localStorage.removeItem(LS_USER_KEY);
+  localStorage.removeItem(LS_EMAIL_KEY);
+  console.log("[LS] eliminado: demoUser/demoEmail borrados");
+});
+```
+
+**Sintaxis:**
+```javascript
+localStorage.removeItem(clave);
+```
+
+### clear() - Limpiar Todo
+
+Elimina todos los datos del localStorage:
+
+```javascript
+localStorage.clear();
+console.log('Todo el localStorage ha sido vaciado');
+```
+
+<Warning>
+`clear()` elimina TODOS los datos del dominio actual. Usa con precaución.
+</Warning>
+
+## Actualizar Datos
+
+Para actualizar, simplemente sobrescribe el valor:
+
+```javascript
+const btnLsUpdate = document.getElementById("ls-update");
+
+btnLsUpdate.addEventListener("click", function () {
+  localStorage.setItem(LS_USER_KEY, "morty");
+  localStorage.setItem(LS_EMAIL_KEY, "morty@example.com");
+  console.log("[LS] modificado: { user: morty, email: morty@example.com }");
+});
+```
+
+No hay diferencia entre crear y actualizar - `setItem()` sobrescribe si la clave existe.
+
+## Almacenar Objetos y Arrays
+
+localStorage solo almacena strings. Para objetos o arrays, usa JSON:
+
+### Guardar Objeto
+
+```javascript
+const usuario = {
+  nombre: 'Juan',
+  email: 'juan@example.com',
+  edad: 25,
+  preferencias: {
+    tema: 'oscuro',
+    idioma: 'es'
+  }
+};
+
+// Convertir a string JSON
+localStorage.setItem('usuario', JSON.stringify(usuario));
+```
+
+### Leer Objeto
+
+```javascript
+// Obtener string y parsear a objeto
+const usuarioString = localStorage.getItem('usuario');
+
+if (usuarioString) {
+  const usuario = JSON.parse(usuarioString);
+  console.log(usuario.nombre); // 'Juan'
+  console.log(usuario.preferencias.tema); // 'oscuro'
+}
+```
+
+### Guardar Array
+
+```javascript
+const tareas = [
+  { id: 1, texto: 'Aprender JavaScript', completada: false },
+  { id: 2, texto: 'Practicar DOM', completada: true }
+];
+
+localStorage.setItem('tareas', JSON.stringify(tareas));
+```
+
+### Leer Array
+
+```javascript
+const tareasString = localStorage.getItem('tareas');
+
+if (tareasString) {
+  const tareas = JSON.parse(tareasString);
+  tareas.forEach(tarea => {
+    console.log(`${tarea.texto}: ${tarea.completada}`);
+  });
+}
+```
+
+<Tip>
+Siempre verifica si el valor existe antes de parsearlo con `JSON.parse()`. Si la clave no existe, `getItem()` retorna `null` y parsear `null` causará un error.
+</Tip>
+
+## Verificar si Existe una Clave
+
+```javascript
+if (localStorage.getItem('usuario')) {
+  console.log('Usuario existe');
+} else {
+  console.log('No hay usuario guardado');
+}
+
+// O verificar explícitamente contra null
+if (localStorage.getItem('usuario') !== null) {
+  console.log('Usuario existe');
+}
+```
+
+## Iterar sobre localStorage
+
+### Obtener todas las claves
+
+```javascript
+// localStorage.length te da el número de items
+for (let i = 0; i < localStorage.length; i++) {
+  const clave = localStorage.key(i);
+  const valor = localStorage.getItem(clave);
+  console.log(`${clave}: ${valor}`);
+}
+```
+
+### Listar todo el contenido
+
+```javascript
+function mostrarLocalStorage() {
+  console.log('Contenido de localStorage:');
+  
+  if (localStorage.length === 0) {
+    console.log('localStorage está vacío');
+    return;
+  }
+  
+  for (let i = 0; i < localStorage.length; i++) {
+    const clave = localStorage.key(i);
+    const valor = localStorage.getItem(clave);
+    console.log(`  ${clave}: ${valor}`);
+  }
+}
+```
+
+## Casos de Uso Comunes
+
+<AccordionGroup>
+  <Accordion title="Preferencias del Usuario">
+    ```javascript
+    // Guardar preferencias
+    function guardarPreferencias(tema, idioma) {
+      const prefs = { tema, idioma };
+      localStorage.setItem('preferencias', JSON.stringify(prefs));
+    }
+    
+    // Cargar preferencias al inicio
+    function cargarPreferencias() {
+      const prefs = localStorage.getItem('preferencias');
+      if (prefs) {
+        const { tema, idioma } = JSON.parse(prefs);
+        aplicarTema(tema);
+        cambiarIdioma(idioma);
+      }
+    }
+    
+    cargarPreferencias();
+    ```
+  </Accordion>
+
+  <Accordion title="Guardar Estado del Formulario">
+    ```javascript
+    // Guardar automáticamente mientras escriben
+    const textarea = document.getElementById('comentario');
+    
+    textarea.addEventListener('input', (e) => {
+      localStorage.setItem('borrador', e.target.value);
+    });
+    
+    // Restaurar al cargar
+    window.addEventListener('DOMContentLoaded', () => {
+      const borrador = localStorage.getItem('borrador');
+      if (borrador) {
+        textarea.value = borrador;
+      }
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Lista de Tareas">
+    ```javascript
+    function guardarTareas(tareas) {
+      localStorage.setItem('tareas', JSON.stringify(tareas));
+    }
+    
+    function cargarTareas() {
+      const tareas = localStorage.getItem('tareas');
+      return tareas ? JSON.parse(tareas) : [];
+    }
+    
+    function agregarTarea(texto) {
+      const tareas = cargarTareas();
+      tareas.push({
+        id: Date.now(),
+        texto,
+        completada: false
+      });
+      guardarTareas(tareas);
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Caché de Datos">
+    ```javascript
+    async function obtenerUsuario(id) {
+      const cacheKey = `usuario_${id}`;
+      
+      // Intentar obtener del cache
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        console.log('Usando cache');
+        return JSON.parse(cached);
+      }
+      
+      // Si no hay cache, obtener del servidor
+      const response = await fetch(`/api/users/${id}`);
+      const usuario = await response.json();
+      
+      // Guardar en cache
+      localStorage.setItem(cacheKey, JSON.stringify(usuario));
+      
+      return usuario;
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Limitaciones y Consideraciones
+
+### 1. Solo Strings
+
+```javascript
+// ❌ Esto NO funciona como esperas
+localStorage.setItem('numero', 42);
+localStorage.setItem('objeto', { nombre: 'Juan' });
+
+console.log(typeof localStorage.getItem('numero')); // "string"
+console.log(localStorage.getItem('objeto')); // "[object Object]"
+
+// ✅ Usa JSON para objetos
+localStorage.setItem('objeto', JSON.stringify({ nombre: 'Juan' }));
+```
+
+### 2. Límite de Almacenamiento
+
+```javascript
+// Verificar cuánto espacio queda (aprox.)
+function obtenerTamanoLocalStorage() {
+  let total = 0;
+  for (let clave in localStorage) {
+    if (localStorage.hasOwnProperty(clave)) {
+      total += localStorage[clave].length + clave.length;
+    }
+  }
+  return (total / 1024).toFixed(2) + ' KB';
+}
+
+console.log('Tamaño de localStorage:', obtenerTamanoLocalStorage());
+```
+
+### 3. Es Síncrono
+
+```javascript
+// localStorage bloquea el hilo principal
+// Para datos grandes, considera usar IndexedDB en su lugar
+const datosGrandes = generarDatosGrandes(); // 5MB
+localStorage.setItem('datos', JSON.stringify(datosGrandes)); // Bloquea
+```
+
+<Warning>
+No almacenes información sensible (contraseñas, tokens, datos personales) en localStorage. Cualquier JavaScript en la página puede acceder a él.
+</Warning>
+
+## localStorage vs sessionStorage
+
+| Característica | localStorage | sessionStorage |
+|-----------------|--------------|----------------|
+| Persistencia | Permanente | Solo la sesión |
+| Alcance | Todas las pestañas | Una pestaña |
+| Expiración | Nunca (hasta que se borre) | Al cerrar la pestaña |
+| Uso común | Preferencias, cache | Estado temporal |
+
+## Buenas Prácticas
+
+<Steps>
+  <Step title="Usa constantes para las claves">
+    ```javascript
+    // ✅ Bien
+    const STORAGE_KEYS = {
+      USER: 'app_user',
+      PREFS: 'app_preferences'
+    };
+    
+    localStorage.setItem(STORAGE_KEYS.USER, data);
+    
+    // ❌ Evita magic strings
+    localStorage.setItem('user', data);
+    ```
+  </Step>
+
+  <Step title="Maneja errores de parseo">
+    ```javascript
+    function obtenerObjeto(clave) {
+      try {
+        const item = localStorage.getItem(clave);
+        return item ? JSON.parse(item) : null;
+      } catch (error) {
+        console.error('Error al parsear:', error);
+        return null;
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Crea funciones helper">
+    ```javascript
+    const storage = {
+      get(key) {
+        const item = localStorage.getItem(key);
+        try {
+          return JSON.parse(item);
+        } catch {
+          return item;
+        }
+      },
+      
+      set(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+      },
+      
+      remove(key) {
+        localStorage.removeItem(key);
+      }
+    };
+    
+    // Uso
+    storage.set('usuario', { nombre: 'Juan' });
+    const usuario = storage.get('usuario');
+    ```
+  </Step>
+
+  <Step title="Verifica disponibilidad">
+    ```javascript
+    function localStorageDisponible() {
+      try {
+        const test = '__test__';
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    
+    if (localStorageDisponible()) {
+      // Usar localStorage
+    } else {
+      // Fallback alternativo
+    }
+    ```
+  </Step>
+</Steps>
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="sessionStorage" icon="clock" href="/storage/session-storage">
+    Almacenamiento temporal por sesión
+  </Card>
+  <Card title="Ejemplos de Storage" icon="code" href="/examples/storage-examples">
+    Ve ejemplos completos de uso de storage
+  </Card>
+</CardGroup>

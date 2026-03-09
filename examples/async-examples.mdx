@@ -1,0 +1,420 @@
+---
+title: Ejemplos Asíncronos
+description: Ejemplos completos de programación asíncrona en JavaScript
+---
+
+# Ejemplos Completos de JavaScript Asíncrono
+
+Estos ejemplos muestran cómo usar setTimeout, callbacks, promises y async/await en situaciones reales.
+
+## Ejemplo 1: setTimeout y Asincronismo Básico
+
+```javascript
+const timeOutButton = document.getElementById("timeout");
+
+timeOutButton.addEventListener("click", function () {
+  console.log("Inicio del programa");
+  setTimeout(() => {
+    console.log("Esto se ejecuta después de 2 segundos");
+  }, 2000);
+  console.log("Fin del programa");
+});
+```
+
+**Salida:**
+```
+Inicio del programa
+Fin del programa
+Esto se ejecuta después de 2 segundos  // Después de 2 segundos
+```
+
+## Ejemplo 2: Código Bloqueante vs No Bloqueante
+
+### Problema: Código Bloqueante
+
+```javascript
+function heavyFunction() {
+  let count = 0;
+  for (let i = 0; i < 1000000000; i++) {
+    count++;
+  }
+  console.log("Desbloqueado");
+}
+
+const blockButton = document.getElementById("block");
+
+blockButton.addEventListener("click", function () {
+  console.log("First step");
+  heavyFunction(); // Bloquea TODO
+  console.log("Last Step");
+});
+```
+
+**Problema:** La UI se congela durante la ejecución de `heavyFunction()`.
+
+### Solución: Código No Bloqueante
+
+```javascript
+const noBlockButton = document.getElementById("no-block");
+
+noBlockButton.addEventListener("click", function () {
+  console.log("First step");
+  setTimeout(function () {
+    let count = 0;
+    for (let i = 0; i < 1000000000; i++) {
+      count++;
+    }
+    console.log("Desbloqueado");
+  }, 0); // Se ejecuta asíncronamente
+  console.log("Last Step");
+});
+```
+
+**Salida:**
+```
+First step
+Last Step
+Desbloqueado  // Después de que termine el bucle
+```
+
+<Tip>
+Incluso con `setTimeout(..., 0)`, la función se ejecuta asíncronamente, permitiendo que el código posterior se ejecute primero.
+</Tip>
+
+## Ejemplo 3: Callbacks
+
+### Callback Simple
+
+```javascript
+const callBackButton = document.getElementById("callback");
+
+callBackButton.addEventListener("click", function () {
+  function saludar(nombre, callback) {
+    console.log("Hola " + nombre);
+    callback();
+  }
+
+  function despedir() {
+    console.log("Adiós!");
+  }
+
+  saludar("Julián", despedir);
+});
+```
+
+**Salida:**
+```
+Hola Julián
+Adiós!
+```
+
+### Callback Hell
+
+```javascript
+const hellButton = document.getElementById("hell-button");
+
+hellButton.addEventListener("click", function () {
+  setTimeout(() => {
+    console.log("Primer paso");
+    setTimeout(() => {
+      console.log("Segundo paso");
+      setTimeout(() => {
+        console.log("Tercer paso");
+      }, 1000);
+    }, 1000);
+  }, 1000);
+});
+```
+
+Este patrón es difícil de leer y mantener. Veamos cómo Promises lo mejoran.
+
+## Ejemplo 4: Promises
+
+### Promise Resuelta
+
+```javascript
+const resolvePromiseBtn = document.getElementById("promise-resolved");
+
+resolvePromiseBtn.addEventListener("click", function () {
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve("✅ Operación exitosa");
+    }, 2000);
+  });
+
+  console.log(promise); // Promise { <pending> }
+
+  promise
+    .then((mensaje) => console.log(mensaje))
+    .catch((error) => console.log(error));
+});
+```
+
+### Promise Rechazada
+
+```javascript
+const rejectPromiseBtn = document.getElementById("promise-rejected");
+
+rejectPromiseBtn.addEventListener("click", function () {
+  const promise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject("❌ Hubo un error");
+    }, 2000);
+  });
+
+  promise
+    .then((mensaje) => console.log(mensaje))
+    .catch((error) => console.log(error)); // Se ejecuta este
+});
+```
+
+### Encadenar Promises
+
+```javascript
+function paso1() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      console.log("Paso 1 completado");
+      resolve("Resultado 1");
+    }, 1000);
+  });
+}
+
+function paso2(resultadoAnterior) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      console.log("Paso 2 completado con:", resultadoAnterior);
+      resolve("Resultado 2");
+    }, 1000);
+  });
+}
+
+function paso3(resultadoAnterior) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      console.log("Paso 3 completado con:", resultadoAnterior);
+      resolve("Resultado Final");
+    }, 1000);
+  });
+}
+
+// Ejecutar en secuencia
+paso1()
+  .then(resultado1 => paso2(resultado1))
+  .then(resultado2 => paso3(resultado2))
+  .then(resultadoFinal => {
+    console.log("Todo completado:", resultadoFinal);
+  })
+  .catch(error => {
+    console.error("Error:", error);
+  });
+```
+
+## Ejemplo 5: Async/Await
+
+### Versión con .then()
+
+```javascript
+function cargarDatosThen() {
+  fetch("https://jsonplaceholder.typicode.com/todos/1")
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      console.log(data);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+}
+```
+
+### Versión con Async/Await
+
+```javascript
+const asyncAwaitBtn = document.getElementById("async-await");
+
+asyncAwaitBtn.addEventListener("click", async function() {
+  try {
+    console.log("⏳ Cargando...");
+    const response = await fetch(
+      "https://jsonplaceholder.typicode.com/todos/1"
+    );
+    const data = await response.json();
+    console.log(data);
+    console.log("✅ Listo");
+  } catch (error) {
+    console.log(error);
+  }
+});
+```
+
+<Note>
+La versión con async/await es mucho más fácil de leer - parece código síncrono pero es asíncrono.
+</Note>
+
+## Ejemplo 6: Múltiples Operaciones en Paralelo
+
+### Secuencial (Lento)
+
+```javascript
+async function cargarDatosSecuencial() {
+  console.log('Iniciando carga secuencial...');
+  
+  const usuarios = await fetch('/api/users').then(r => r.json());
+  console.log('Usuarios cargados');
+  
+  const productos = await fetch('/api/products').then(r => r.json());
+  console.log('Productos cargados');
+  
+  const ordenes = await fetch('/api/orders').then(r => r.json());
+  console.log('Ordenes cargadas');
+  
+  console.log('Todo completado');
+  // Tiempo total: suma de cada petición
+}
+```
+
+### Paralelo (Rápido)
+
+```javascript
+async function cargarDatosParalelo() {
+  console.log('Iniciando carga paralela...');
+  
+  // Iniciar todas las peticiones al mismo tiempo
+  const [usuarios, productos, ordenes] = await Promise.all([
+    fetch('/api/users').then(r => r.json()),
+    fetch('/api/products').then(r => r.json()),
+    fetch('/api/orders').then(r => r.json())
+  ]);
+  
+  console.log('Todo completado');
+  // Tiempo total: tiempo de la petición más lenta
+}
+```
+
+## Ejemplo 7: Simulador de Carga con Progreso
+
+```javascript
+function simularCarga(nombre, duracion) {
+  return new Promise(resolve => {
+    console.log(`⏳ Cargando ${nombre}...`);
+    setTimeout(() => {
+      console.log(`✅ ${nombre} completado`);
+      resolve(nombre);
+    }, duracion);
+  });
+}
+
+async function cargarRecursos() {
+  try {
+    // Cargar en secuencia con feedback
+    await simularCarga('Configuración', 1000);
+    await simularCarga('Base de datos', 1500);
+    await simularCarga('Assets', 800);
+    
+    console.log('🎉 Todo listo!');
+  } catch (error) {
+    console.error('❌ Error al cargar:', error);
+  }
+}
+
+// Ejecutar
+cargarRecursos();
+```
+
+## Ejemplo 8: Sistema de Reintentos
+
+```javascript
+async function fetchConReintentos(url, intentosMaximos = 3) {
+  for (let intento = 1; intento <= intentosMaximos; intento++) {
+    try {
+      console.log(`Intento ${intento} de ${intentosMaximos}...`);
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Éxito');
+      return data;
+      
+    } catch (error) {
+      console.log(`❌ Intento ${intento} falló:`, error.message);
+      
+      if (intento === intentosMaximos) {
+        throw new Error(`Falló después de ${intentosMaximos} intentos`);
+      }
+      
+      // Esperar antes del siguiente intento
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+}
+
+// Uso
+fetchConReintentos('https://api.ejemplo.com/datos')
+  .then(datos => console.log('Datos:', datos))
+  .catch(error => console.error('Error final:', error));
+```
+
+## Comparación: Callback vs Promise vs Async/Await
+
+<Tabs>
+  <Tab title="Callbacks">
+    ```javascript
+    obtenerUsuario(1, (error, usuario) => {
+      if (error) {
+        console.error(error);
+        return;
+      }
+      obtenerPosts(usuario.id, (error, posts) => {
+        if (error) {
+          console.error(error);
+          return;
+        }
+        console.log(posts);
+      });
+    });
+    ```
+    
+    **Problema:** Callback hell, difícil de leer.
+  </Tab>
+
+  <Tab title="Promises">
+    ```javascript
+    obtenerUsuario(1)
+      .then(usuario => obtenerPosts(usuario.id))
+      .then(posts => console.log(posts))
+      .catch(error => console.error(error));
+    ```
+    
+    **Mejor:** Más plano, un solo .catch().
+  </Tab>
+
+  <Tab title="Async/Await">
+    ```javascript
+    try {
+      const usuario = await obtenerUsuario(1);
+      const posts = await obtenerPosts(usuario.id);
+      console.log(posts);
+    } catch (error) {
+      console.error(error);
+    }
+    ```
+    
+    **Mejor:** Lee como código síncrono.
+  </Tab>
+</Tabs>
+
+## Próximos Pasos
+
+<CardGroup cols={2}>
+  <Card title="Ejemplos de Fetch" icon="cloud" href="/examples/fetch-examples">
+    Ve cómo usar async/await con Fetch API
+  </Card>
+  <Card title="Ejemplos de Storage" icon="database" href="/examples/storage-examples">
+    Combina asincronismo con almacenamiento
+  </Card>
+</CardGroup>
